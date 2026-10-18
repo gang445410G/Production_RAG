@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Capstone RAG Chatbot — Technical Documentation</title>
+<style>
+  :root{
+    --navy:#0B2545; --blue:#13315C; --mid:#1D4E89; --sky:#E8F0FA;
+    --teal:#0F9D8A; --teal-l:#E3F6F3;
+    --lc:#1C7C54; --lc-l:#E6F4EC; --lc-d:#0E4D33;
+    --amber:#E39B2D; --amber-l:#FDF3E2;
+    --red:#C0392B; --red-l:#FBEAEA;
+    --grey:#5B6675; --line:#D5DCE6; --zebra:#F5F8FC; --ink:#1F2A37;
+  }
+  @page{ size:A4; margin:16mm 14mm 18mm 14mm;
+    @bottom-left{ content:"Capstone RAG Chatbot · Technical Documentation"; font:8pt "Segoe UI",Arial,sans-serif; color:#8A94A3; }
+    @bottom-right{ content:"Page " counter(page) " of " counter(pages); font:8pt "Segoe UI",Arial,sans-serif; color:#8A94A3; }
+  }
+  @page cover{ margin:0; @bottom-left{content:none} @bottom-right{content:none} }
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ font-family:"Segoe UI","Calibri","Helvetica Neue",Arial,sans-serif; color:var(--ink); font-size:10pt; line-height:1.55; margin:0; }
+  .wrap{ max-width:900px; margin:0 auto; padding:0 6px; }
+  @media screen{ body{ background:#EEF2F7; } .wrap{ background:#fff; padding:30px 46px; box-shadow:0 2px 18px rgba(0,0,0,.08); margin:24px auto; } .cover{ margin:24px auto 0; max-width:900px; } }
+
+  /* ---------- cover ---------- */
+  .cover{ page:cover; height:297mm; position:relative; overflow:hidden; color:#fff;
+    background:linear-gradient(150deg,#071A33 0%,#0B2545 45%,#13315C 75%,#0F6B63 100%); break-after:page; }
+  .cover .band{ position:absolute; left:0; right:0; top:0; height:9mm; background:linear-gradient(90deg,var(--teal),var(--lc),var(--amber)); }
+  .cover .inner{ position:absolute; left:22mm; right:22mm; top:58mm; }
+  .cover .kicker{ letter-spacing:.32em; font-size:10pt; color:#9FD9CF; text-transform:uppercase; font-weight:600; }
+  .cover h1{ font-size:38pt; line-height:1.1; margin:6mm 0 4mm; font-weight:700; color:#fff; border:none; padding:0; }
+  .cover .sub{ font-size:15pt; color:#D4E3F5; font-weight:300; max-width:150mm; }
+  .cover .chips{ margin-top:12mm; display:flex; flex-wrap:wrap; gap:3mm; }
+  .cover .chip{ border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.08); padding:2mm 4mm; border-radius:20px; font-size:9pt; }
+  .cover .chip.lc{ background:var(--lc); border-color:var(--lc); font-weight:600; }
+  .cover .meta{ position:absolute; left:22mm; right:22mm; bottom:24mm; display:grid; grid-template-columns:repeat(4,1fr); gap:4mm; border-top:1px solid rgba(255,255,255,.25); padding-top:6mm; }
+  .cover .meta div{ font-size:8.5pt; color:#AFC3DC; } .cover .meta b{ display:block; color:#fff; font-size:10.5pt; font-weight:600; }
+  .cover .art{ position:absolute; right:-30mm; top:120mm; opacity:.13; }
+
+  /* ---------- headings ---------- */
+  h1{ font-size:20pt; color:var(--navy); margin:0 0 4mm; padding:3mm 0 2.5mm; border-bottom:3px solid var(--teal); break-after:avoid; }
+  h1 .num{ display:inline-block; background:var(--navy); color:#fff; border-radius:6px; padding:0 9px; margin-right:8px; font-size:15pt; vertical-align:2px; }
+  h2{ font-size:13.5pt; color:var(--blue); margin:7mm 0 2.5mm; padding-left:9px; border-left:5px solid var(--teal); break-after:avoid; }
+  h3{ font-size:11pt; color:var(--mid); margin:5mm 0 2mm; break-after:avoid; }
+  h4{ font-size:10pt; color:var(--navy); margin:4mm 0 1.5mm; break-after:avoid; text-transform:uppercase; letter-spacing:.05em; }
+  section.chapter{ break-before:page; }
+  p{ margin:1.5mm 0 2.5mm; text-align:justify; }
+  ul,ol{ margin:1mm 0 3mm; padding-left:6mm; } li{ margin:.8mm 0; }
+  code{ font-family:"Cascadia Code","Consolas","Courier New",monospace; font-size:8.6pt; background:#EEF2F8; color:#123A6B; padding:.5px 4px; border-radius:3px; }
+  a{ color:var(--mid); text-decoration:none; }
+
+  /* ---------- tables ---------- */
+  table{ width:100%; border-collapse:collapse; margin:2mm 0 4mm; font-size:8.8pt; break-inside:auto; }
+  thead{ display:table-header-group; }
+  tr{ break-inside:avoid; }
+  th{ background:var(--navy); color:#fff; text-align:left; padding:6px 8px; font-weight:600; border:1px solid var(--navy); }
+  td{ padding:5px 8px; border:1px solid var(--line); vertical-align:top; }
+  tbody tr:nth-child(even) td{ background:var(--zebra); }
+  table.lc th{ background:var(--lc-d); border-color:var(--lc-d); }
+  table.teal th{ background:var(--teal); border-color:var(--teal); }
+  table.kv td:first-child{ width:28%; font-weight:600; color:var(--blue); }
+  td code{ font-size:8.2pt; }
+  td, th{ overflow-wrap:break-word; }
+  th{ white-space:nowrap; }
+
+  /* ---------- badges ---------- */
+  .b{ display:inline-block; padding:0 7px; border-radius:10px; font-size:7.6pt; font-weight:700; color:#fff; white-space:nowrap; line-height:1.7; }
+  .b.lc{ background:var(--lc); } .b.core{ background:var(--mid); } .b.ext{ background:#7A5BB5; } .b.ui{ background:#D9534F; }
+  .b.ok{ background:var(--teal); } .b.warn{ background:var(--amber); } .b.crit{ background:var(--red); } .b.info{ background:#6C7A89; } .b.dead{ background:#9AA5B1; }
+  .b.hi{ background:var(--red); } .b.med{ background:var(--amber); } .b.lo{ background:#4A90C2; }
+
+  /* ---------- callouts ---------- */
+  .call{ border-radius:6px; padding:3mm 4mm; margin:3mm 0 4mm; break-inside:avoid; border-left:5px solid; }
+  .call .t{ font-weight:700; margin-bottom:1mm; font-size:9.6pt; }
+  .call p{ margin:1mm 0; } .call ul{ margin:1mm 0; }
+  .call.lc{ background:var(--lc-l); border-color:var(--lc); } .call.lc .t{ color:var(--lc-d); }
+  .call.info{ background:var(--sky); border-color:var(--mid); } .call.info .t{ color:var(--blue); }
+  .call.warn{ background:var(--amber-l); border-color:var(--amber); } .call.warn .t{ color:#8A5A12; }
+  .call.crit{ background:var(--red-l); border-color:var(--red); } .call.crit .t{ color:var(--red); }
+
+  /* ---------- code ---------- */
+  pre{ background:#0F1B2D; color:#DCE6F2; font-family:"Cascadia Code","Consolas",monospace; font-size:8.1pt; line-height:1.5; padding:3.5mm 4mm; border-radius:6px; overflow:hidden; white-space:pre-wrap; word-break:break-word; margin:2mm 0 4mm; break-inside:avoid; border-top:3px solid var(--teal); }
+  pre .k{ color:#C792EA; } pre .s{ color:#C3E88D; } pre .c{ color:#6F86A3; font-style:italic; } pre .lc{ color:#5EEAAA; font-weight:700; } pre .f{ color:#82AAFF; } pre .n{ color:#F78C6C; }
+  .file{ display:inline-block; background:var(--blue); color:#fff; font:600 8pt "Cascadia Code",Consolas,monospace; padding:1px 8px; border-radius:4px 4px 0 0; margin-bottom:-2mm; }
+
+  /* ---------- misc layouts ---------- */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:3mm; }
+  .card{ border:1px solid var(--line); border-radius:8px; padding:3mm 4mm; background:#fff; break-inside:avoid; border-top:4px solid var(--teal); }
+  .card h4{ margin-top:0; }
+  .card.lc{ border-top-color:var(--lc); } .card.navy{ border-top-color:var(--navy); } .card.amber{ border-top-color:var(--amber); }
+  .kpi{ text-align:center; padding:3mm; border-radius:8px; background:var(--sky); break-inside:avoid; }
+  .kpi b{ display:block; font-size:19pt; color:var(--navy); line-height:1.2; } .kpi span{ font-size:8pt; color:var(--grey); text-transform:uppercase; letter-spacing:.06em; }
+  .kpi.lc{ background:var(--lc-l); } .kpi.lc b{ color:var(--lc-d); }
+  .tree{ background:#F7F9FC; border:1px solid var(--line); border-left:5px solid var(--navy); color:var(--ink); border-top:1px solid var(--line); }
+  .tree .d{ color:var(--mid); font-weight:700; } .tree .c{ color:#7C8794; font-style:normal; } .tree .lcf{ color:var(--lc); font-weight:700; }
+  figure{ margin:3mm 0 5mm; break-inside:avoid; text-align:center; }
+  figcaption{ font-size:8.4pt; color:var(--grey); margin-top:1.5mm; font-style:italic; }
+  svg text{ font-family:"Segoe UI",Arial,sans-serif; }
+  figure svg{ max-width:100%; height:auto; }
+
+  /* ---------- TOC ---------- */
+  .toc{ columns:2; column-gap:10mm; font-size:9.6pt; }
+  .toc .grp{ break-inside:avoid; margin-bottom:3mm; }
+  .toc .h{ font-weight:700; color:var(--navy); border-bottom:1px solid var(--line); padding-bottom:1mm; margin-bottom:1mm; }
+  .toc .h span{ color:var(--teal); margin-right:4px; }
+  .toc .s{ padding-left:6mm; color:var(--grey); font-size:8.8pt; line-height:1.6; }
+  .legend{ display:flex; gap:4mm; flex-wrap:wrap; font-size:8.4pt; margin:2mm 0 4mm; align-items:center; }
+  .sig{ font-family:"Cascadia Code",Consolas,monospace; font-size:8.6pt; background:var(--navy); color:#fff; padding:2mm 3mm; border-radius:5px 5px 0 0; margin-top:4mm; break-after:avoid; }
+  .sig .fn{ color:#7FE3D2; font-weight:700; } .sig .ty{ color:#F5C77E; }
+  .sigbody{ border:1px solid var(--line); border-top:none; border-radius:0 0 5px 5px; padding:2.5mm 3.5mm; margin-bottom:3mm; break-inside:avoid; }
+  .sigbody table{ margin:1.5mm 0 1mm; }
+  .small{ font-size:8.4pt; color:var(--grey); }
+  .nobreak{ break-inside:avoid; }
+</style>
+</head>
+<body>
+
+<!-- =====================================================================
+     COVER
+====================================================================== -->
+<div class="cover">
+  <div class="band"></div>
+  <svg class="art" width="520" height="520" viewBox="0 0 200 200">
+    <g fill="none" stroke="#fff" stroke-width="1.4">
+      <circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="64"/><circle cx="100" cy="100" r="38"/>
+      <line x1="10" y1="100" x2="190" y2="100"/><line x1="100" y1="10" x2="100" y2="190"/>
+      <line x1="36" y1="36" x2="164" y2="164"/><line x1="164" y1="36" x2="36" y2="164"/>
+    </g>
+    <g fill="#fff"><circle cx="100" cy="10" r="5"/><circle cx="190" cy="100" r="5"/><circle cx="100" cy="190" r="5"/><circle cx="10" cy="100" r="5"/><circle cx="145" cy="55" r="4"/><circle cx="55" cy="145" r="4"/><circle cx="100" cy="100" r="8"/></g>
+  </svg>
+  <div class="inner">
+    <div class="kicker">Technical Documentation · Capstone Project</div>
+    <h1>Capstone RAG Chatbot</h1>
+    <div class="sub">A multi-provider Retrieval-Augmented Generation assistant with hybrid conversational memory, built on the <b>LangChain</b> framework and the LangChain Expression Language (LCEL).</div>
+    <div class="chips">
+      <span class="chip lc">🦜🔗 LangChain 0.3</span><span class="chip">LCEL Runnables</span><span class="chip">OpenAI</span><span class="chip">Google Gemini</span>
+      <span class="chip">FAISS</span><span class="chip">Pinecone</span><span class="chip">Streamlit</span><span class="chip">Hybrid Memory</span><span class="chip">Python 3.12</span>
+    </div>
+  </div>
+  <div class="meta">
+    <div>Document<b>Architecture &amp; Code Reference</b></div>
+    <div>Framework<b>LangChain 0.3.x</b></div>
+    <div>Programme<b>IIT Patna · Module 5</b></div>
+    <div>Revision<b>1.0 · October 2026</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- =====================================================================
+     TOC
+====================================================================== -->
+<h1 style="border-bottom-color:var(--navy)">Table of Contents</h1>
+<div class="toc">
+  <div class="grp"><div class="h"><span>01</span>Executive Summary</div><div class="s">1.1 Purpose · 1.2 Key capabilities · 1.3 At a glance</div></div>
+  <div class="grp"><div class="h"><span>02</span>Technology Stack</div><div class="s">2.1 Stack by layer · 2.2 LangChain package family</div></div>
+  <div class="grp"><div class="h"><span>03</span>Project Structure</div><div class="s">3.1 Directory tree · 3.2 Folder reference · 3.3 File reference</div></div>
+  <div class="grp"><div class="h"><span>04</span>System Architecture</div><div class="s">4.1 Layered view · 4.2 Component responsibilities · 4.3 Design principles · 4.4 Module dependency graph</div></div>
+  <div class="grp"><div class="h"><span>05</span>End-to-End Workflow</div><div class="s">5.1 Ingestion pipeline · 5.2 Question-answering pipeline · 5.3 Streamlit run lifecycle</div></div>
+  <div class="grp"><div class="h"><span>06</span>LangChain Framework Usage</div><div class="s">6.1 Usage map · 6.2 Concepts explained · 6.3 Anatomy of the LCEL chain · 6.4 Config propagation</div></div>
+  <div class="grp"><div class="h"><span>07</span>Module Reference</div><div class="s">7.1 utils · 7.2 loader · 7.3 splitter · 7.4 embedder · 7.5 retriever · 7.6 rag_chain · 7.7 memory · 7.8 streamlit_app · 7.9 template · 7.10 notebook</div></div>
+  <div class="grp"><div class="h"><span>08</span>Configuration Reference</div><div class="s">8.1 config.json · 8.2 Environment variables</div></div>
+  <div class="grp"><div class="h"><span>09</span>Installation &amp; Operation</div><div class="s">9.1 Prerequisites · 9.2 Setup · 9.3 Running · 9.4 Switching providers</div></div>
+  <div class="grp"><div class="h"><span>10</span>Engineering Review</div><div class="s">10.1 Findings register · 10.2 Recommended roadmap</div></div>
+  <div class="grp"><div class="h"><span>11</span>Glossary</div><div class="s">Key RAG and LangChain terminology</div></div>
+</div>
+
+<div class="legend" style="margin-top:6mm">
+  <b>Badge legend:</b>
+  <span class="b lc">LangChain</span> LangChain component
+  <span class="b core">Core</span> project module
+  <span class="b ext">External SDK</span> non-LangChain library
+  <span class="b ui">UI</span> presentation layer
+</div>
+<div class="call lc"><div class="t">🦜🔗 How to read this document</div>
+<p>Every place where the LangChain framework is used is marked with a <b>green</b> “LangChain in action” callout, a green-headed table, or a <span class="b lc">LangChain</span> badge. Code references use the form <code>modules/rag_chain.py:76</code> (file : line) so they can be followed directly in the repository.</p></div>
+
+<!-- =====================================================================
+     1. EXECUTIVE SUMMARY
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">1</span>Executive Summary</h1>
+
+<h2>1.1 Purpose</h2>
+<p>The <b>Capstone RAG Chatbot</b> is a document question-answering assistant. Users upload PDF, DOCX or TXT files (or point the loader at a web URL); the application splits each document into overlapping chunks, converts the chunks into vector embeddings, and stores them in a vector database. When a user asks a question, the most relevant chunks are retrieved and passed — together with a running summary of the conversation and the last few exchanges — to a Large Language Model (LLM), which writes a grounded answer.</p>
+<p>The whole pipeline is assembled from <b>LangChain</b> building blocks. LangChain supplies the common data model (<code>Document</code>), provider-neutral interfaces for embeddings, vector stores, retrievers and chat models, and the <b>LangChain Expression Language (LCEL)</b>, which the project uses to compose those parts into one runnable chain with per-session memory.</p>
+
+<h2>1.2 Key Capabilities</h2>
+<table>
+<thead><tr><th style="width:24%">Capability</th><th>Description</th><th style="width:22%">Enabled by</th></tr></thead>
+<tbody>
+<tr><td><b>Multi-format ingestion</b></td><td>Loads <code>.<wbr>txt</code>, <code>.<wbr>md</code>, <code>.<wbr>pdf</code> (page by page), <code>.<wbr>docx</code> and live web pages into a common document format.</td><td><span class="b lc">LangChain</span> <code>Document</code>, pypdf, python-docx, BeautifulSoup</td></tr>
+<tr><td><b>Smart chunking</b></td><td>Recursive, structure-aware splitting with overlap, with the chunk position kept in each chunk's metadata.</td><td><span class="b lc">LangChain</span> <code>Recursive<wbr>Character<wbr>Text<wbr>Splitter</code></td></tr>
+<tr><td><b>Pluggable embeddings</b></td><td>Switch between OpenAI and Google Gemini embedding models through one setting in <code>config.<wbr>json</code>.</td><td><span class="b lc">LangChain</span> <code>Open<wbr>AIEmbeddings</code>, <code>Google<wbr>Generative<wbr>AIEmbeddings</code></td></tr>
+<tr><td><b>Local or cloud vector store</b></td><td>Saves a FAISS index to disk, or uses a serverless/pod Pinecone index. Detects the embedding dimension and checks it against an existing index.</td><td><span class="b lc">LangChain</span> <code>FAISS</code>, <code>Pinecone<wbr>Vector<wbr>Store</code></td></tr>
+<tr><td><b>Two retrieval strategies</b></td><td>Plain top-k similarity search, or a <i>Multi-Query</i> retriever that rewrites the question into several variants to improve recall.</td><td><span class="b lc">LangChain</span> <code>Vector<wbr>Store<wbr>Retriever</code>, <code>Multi<wbr>Query<wbr>Retriever</code></td></tr>
+<tr><td><b>Swappable LLM per chat</b></td><td>Each chat session can choose OpenAI GPT-4o-mini or Gemini 2.5 Flash at runtime.</td><td><span class="b lc">LangChain</span> <code>Chat<wbr>Open<wbr>AI</code>, <code>Chat<wbr>Google<wbr>Generative<wbr>AI</code></td></tr>
+<tr><td><b>Hybrid conversational memory</b></td><td>Combines an LLM-written <i>summary memory</i> with a rolling window of the last <i>n</i> Q&amp;A turns, kept separately for each session.</td><td><span class="b lc">LangChain</span> <code>Conversation<wbr>Summary<wbr>Memory</code>, <code>Runnable<wbr>With<wbr>Message<wbr>History</code></td></tr>
+<tr><td><b>Multi-session chat UI</b></td><td>Streamlit interface with several independent chats, a provider choice and a memory toggle for each chat, and document upload.</td><td><span class="b ui">UI</span> Streamlit</td></tr>
+</tbody></table>
+
+<h2>1.3 At a Glance</h2>
+<div class="grid3" style="grid-template-columns:repeat(6,1fr)">
+  <div class="kpi"><b>7</b><span>Core modules</span></div>
+  <div class="kpi"><b>~750</b><span>Lines of Python</span></div>
+  <div class="kpi lc"><b>16</b><span>LangChain classes used</span></div>
+  <div class="kpi lc"><b>7</b><span>LangChain packages</span></div>
+  <div class="kpi"><b>2</b><span>LLM providers</span></div>
+  <div class="kpi"><b>2</b><span>Vector stores</span></div>
+</div>
+</section>
+
+<!-- =====================================================================
+     2. TECH STACK
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">2</span>Technology Stack</h1>
+<h2>2.1 Stack by Layer</h2>
+<table>
+<thead><tr><th style="width:17%">Layer</th><th style="width:26%">Technology</th><th style="width:20%">Package (pinned)</th><th>Role in the project</th></tr></thead>
+<tbody>
+<tr><td><b>Orchestration</b></td><td><span class="b lc">LangChain</span> LangChain framework</td><td><code>langchain=<wbr>=<wbr>0.<wbr>3.<wbr>25</code></td><td>Legacy entry points: <code>Multi<wbr>Query<wbr>Retriever</code>, <code>Conversation<wbr>Summary<wbr>Memory</code>, prompt and runnable re-exports.</td></tr>
+<tr><td></td><td><span class="b lc">LangChain</span> LangChain Core</td><td><code>langchain-core=<wbr>=<wbr>0.<wbr>3.<wbr>65</code></td><td>Base abstractions: <code>Document</code>, Runnables (LCEL), prompts, chat history, <code>Runnable<wbr>With<wbr>Message<wbr>History</code>.</td></tr>
+<tr><td></td><td><span class="b lc">LangChain</span> Text Splitters</td><td><code>langchain-text-splitters=<wbr>=<wbr>0.<wbr>3.<wbr>8</code></td><td><code>Recursive<wbr>Character<wbr>Text<wbr>Splitter</code>.</td></tr>
+<tr><td></td><td><span class="b lc">LangChain</span> Community</td><td><code>langchain-community=<wbr>=<wbr>0.<wbr>3.<wbr>24</code></td><td><code>FAISS</code> (and <code>Chroma</code>) vector-store wrappers.</td></tr>
+<tr><td><b>LLM providers</b></td><td><span class="b lc">LangChain</span> OpenAI integration</td><td><code>langchain-openai=<wbr>=<wbr>0.<wbr>3.<wbr>18</code></td><td><code>Chat<wbr>Open<wbr>AI</code> chat model, <code>Open<wbr>AIEmbeddings</code>.</td></tr>
+<tr><td></td><td><span class="b lc">LangChain</span> Google GenAI integration</td><td><code>langchain-google-genai&gt;=<wbr>2.<wbr>1.<wbr>5</code></td><td><code>Chat<wbr>Google<wbr>Generative<wbr>AI</code>, <code>Google<wbr>Generative<wbr>AIEmbeddings</code>.</td></tr>
+<tr><td><b>Vector DB</b></td><td><span class="b lc">LangChain</span> Pinecone integration</td><td><code>langchain-pinecone=<wbr>=<wbr>0.<wbr>2.<wbr>13</code></td><td><code>Pinecone<wbr>Vector<wbr>Store</code> wrapper; also brings in the <code>pinecone</code> SDK.</td></tr>
+<tr><td></td><td><span class="b ext">External SDK</span> FAISS (CPU)</td><td><code>faiss-cpu=<wbr>=<wbr>1.<wbr>8.<wbr>0.<wbr>post1</code></td><td>In-process similarity search engine behind the LangChain <code>FAISS</code> wrapper.</td></tr>
+<tr><td></td><td><span class="b ext">External SDK</span> Pinecone SDK</td><td><code>pinecone</code> (unpinned)</td><td>Index admin: <code>list_<wbr>indexes</code>, <code>create_<wbr>index</code>, <code>describe_<wbr>index</code>.</td></tr>
+<tr><td><b>Document parsing</b></td><td><span class="b ext">External SDK</span> pypdf · python-docx · BeautifulSoup · requests</td><td><code>pypdf=<wbr>=<wbr>5.<wbr>1.<wbr>0</code>, <code>python-docx=<wbr>=<wbr>1.<wbr>1.<wbr>2</code>, <code>beautifulsoup4=<wbr>=<wbr>4.<wbr>12.<wbr>3</code>, <code>requests=<wbr>=<wbr>2.<wbr>32.<wbr>3</code></td><td>Text extraction from PDF, Word and HTML pages.</td></tr>
+<tr><td><b>Presentation</b></td><td><span class="b ui">UI</span> Streamlit (Gradio placeholder)</td><td><code>streamlit=<wbr>=<wbr>1.<wbr>39.<wbr>0</code>, <code>gradio=<wbr>=<wbr>5.<wbr>9.<wbr>1</code></td><td>Chat interface, sidebar session management, document upload.</td></tr>
+<tr><td><b>Configuration</b></td><td>python-dotenv · JSON</td><td><code>python-dotenv=<wbr>=<wbr>1.<wbr>0.<wbr>1</code></td><td>Loads API keys from <code>config/<wbr>.<wbr>env</code>; reads runtime settings from <code>config/<wbr>config.<wbr>json</code>.</td></tr>
+<tr><td><b>Observability / utils</b></td><td>LangSmith · tiktoken · numpy · pandas</td><td><code>langsmith=<wbr>=<wbr>0.<wbr>3.<wbr>45</code>, <code>tiktoken=<wbr>=<wbr>0.<wbr>7.<wbr>0</code></td><td>Tracing (when <code>LANGCHAIN_<wbr>TRACING_<wbr>V2</code> is set), tokenisation, numerical support.</td></tr>
+</tbody></table>
+
+<h2>2.2 The LangChain Package Family — Why Several Packages?</h2>
+<p>Since version 0.2, LangChain has been split into separate packages. The project uses this split as intended: provider-specific code lives in <i>partner packages</i>, while the project's own logic depends only on the stable interfaces in <code>langchain-core</code>.</p>
+<figure>
+<svg width="760" height="200" viewBox="0 0 760 200">
+  <defs><marker id="ah0" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1C7C54"/></marker></defs>
+  <rect x="280" y="10" width="200" height="50" rx="8" fill="#0E4D33"/><text x="380" y="32" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">langchain-core</text><text x="380" y="49" fill="#BFE8D2" font-size="10" text-anchor="middle">Document · Runnable · Prompt · ChatHistory</text>
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="125" width="138" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="79" y="148" font-weight="700" fill="#0E4D33">langchain</text><text x="79" y="165" fill="#33534A" font-size="9.5">MultiQueryRetriever · SummaryMemory</text>
+    <rect x="160" y="125" width="138" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="229" y="148" font-weight="700" fill="#0E4D33">text-splitters</text><text x="229" y="165" fill="#33534A" font-size="9.5">RecursiveCharacterTextSplitter</text>
+    <rect x="310" y="125" width="138" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="379" y="148" font-weight="700" fill="#0E4D33">community</text><text x="379" y="165" fill="#33534A" font-size="9.5">FAISS · Chroma</text>
+    <rect x="460" y="125" width="90" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="505" y="148" font-weight="700" fill="#0E4D33">openai</text><text x="505" y="165" fill="#33534A" font-size="9.5">Chat · Embeddings</text>
+    <rect x="560" y="125" width="96" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="608" y="148" font-weight="700" fill="#0E4D33">google-genai</text><text x="608" y="165" fill="#33534A" font-size="9.5">Chat · Embeddings</text>
+    <rect x="666" y="125" width="88" height="56" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="710" y="148" font-weight="700" fill="#0E4D33">pinecone</text><text x="710" y="165" fill="#33534A" font-size="9.5">VectorStore</text>
+  </g>
+  <g stroke="#1C7C54" stroke-width="1.5" marker-end="url(#ah0)">
+    <line x1="79" y1="125" x2="320" y2="62"/><line x1="229" y1="125" x2="350" y2="62"/><line x1="379" y1="125" x2="379" y2="62"/>
+    <line x1="505" y1="125" x2="410" y2="62"/><line x1="608" y1="125" x2="440" y2="62"/><line x1="710" y1="125" x2="470" y2="62"/>
+  </g>
+  <text x="380" y="98" font-size="10" fill="#5B6675" text-anchor="middle" font-style="italic">all packages implement / depend on core interfaces</text>
+</svg>
+<figcaption>Figure 2-1 · The LangChain packages used by the project and how they depend on <code>langchain-core</code>.</figcaption>
+</figure>
+</section>
+
+<!-- =====================================================================
+     3. PROJECT STRUCTURE
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">3</span>Project Structure</h1>
+<h2>3.1 Directory Tree</h2>
+<pre class="tree"><span class="d">Capstone-Project-RAG-Application/</span>
+├── <span class="d">app/</span>                              <span class="c"># Presentation layer (user interfaces)</span>
+│   ├── streamlit_app.py              <span class="c"># ★ Main multi-session chat UI + pipeline orchestration</span>
+│   └── gradio_app.py                 <span class="c"># Placeholder for an alternative Gradio UI (empty)</span>
+├── <span class="d">config/</span>                           <span class="c"># Runtime configuration</span>
+│   ├── config.json                   <span class="c"># Provider, vector-store, retriever, chunking settings</span>
+│   └── .env                          <span class="c"># API keys (git-ignored; created from env-sample.txt)</span>
+├── <span class="d">data/</span>                             <span class="c"># Source documents</span>
+│   ├── sample_docs/                  <span class="c"># Reference corpus used by the notebook</span>
+│   │   ├── sample_text.txt           <span class="c">#   scikit-learn article (~6 KB)</span>
+│   │   └── sample_text2.txt          <span class="c">#   LLM / LangChain article (~15 KB)</span>
+│   └── uploaded_docs/                <span class="c"># Files saved by the Streamlit uploader</span>
+├── <span class="d">modules/</span>                          <span class="c"># Core RAG library (business logic)</span>
+│   ├── __init__.py                   <span class="c"># Marks the folder as a Python package</span>
+│   ├── utils.py                      <span class="lcf"># 🦜 .env loading + embedding-model factory</span>
+│   ├── loader.py                     <span class="lcf"># 🦜 File / URL → LangChain Document</span>
+│   ├── splitter.py                   <span class="lcf"># 🦜 Document → chunks (RecursiveCharacterTextSplitter)</span>
+│   ├── embedder.py                   <span class="lcf"># 🦜 Chunks → FAISS / Pinecone vector store</span>
+│   ├── retriever.py                  <span class="lcf"># 🦜 Vector store → Base / Multi-Query retriever</span>
+│   ├── rag_chain.py                  <span class="lcf"># 🦜 LCEL RAG chain (prompt + LLM + context + memory)</span>
+│   └── memory.py                     <span class="lcf"># 🦜 Hybrid summary + rolling-window session memory</span>
+├── <span class="d">notebooks/</span>
+│   ├── RAG_Debugging_Notebook.ipynb  <span class="c"># Step-by-step test harness for every module</span>
+│   └── <span class="d">vectorstores/openai_faiss_index/</span> <span class="c"># FAISS index created when running the notebook</span>
+│       ├── index.faiss               <span class="c">#   binary vector index</span>
+│       └── index.pkl                 <span class="c">#   pickled docstore + id mapping</span>
+├── <span class="d">vectorstores/</span>                     <span class="c"># (runtime) FAISS index created by the app — cwd-relative</span>
+├── <span class="d">.vscode/</span>settings.json             <span class="c"># Editor settings</span>
+├── env-sample.txt                    <span class="c"># Template for config/.env</span>
+├── requirements.txt                  <span class="c"># Pinned Python dependencies</span>
+├── run_app.bat                       <span class="c"># Windows launcher (placeholder, empty)</span>
+├── template.py                       <span class="c"># Scaffolding script that generated this layout</span>
+└── README.md                         <span class="c"># Repository landing page</span></pre>
+
+<h2>3.2 Folder Reference</h2>
+<table>
+<thead><tr><th style="width:18%">Folder</th><th style="width:13%">Layer</th><th>Purpose</th><th style="width:26%">Key contents</th></tr></thead>
+<tbody>
+<tr><td><code>app/</code></td><td><span class="b ui">UI</span></td><td>Entry points that users interact with. Holds the Streamlit application, which also wires the whole pipeline together.</td><td><code>streamlit_<wbr>app.<wbr>py</code>, <code>gradio_<wbr>app.<wbr>py</code></td></tr>
+<tr><td><code>modules/</code></td><td><span class="b core">Core</span></td><td>Reusable RAG library. Each file covers one pipeline stage (load → split → embed → retrieve → generate → remember). Contains no UI code, so it can be reused from notebooks, scripts or other front ends.</td><td>7 modules + <code>_<wbr>_<wbr>init_<wbr>_<wbr>.<wbr>py</code></td></tr>
+<tr><td><code>config/</code></td><td>Config</td><td>Keeps configuration separate from code: non-secret settings in JSON, secrets in <code>.<wbr>env</code>.</td><td><code>config.<wbr>json</code>, <code>.<wbr>env</code></td></tr>
+<tr><td><code>data/</code></td><td>Data</td><td>Raw input documents. <code>sample_<wbr>docs</code> holds a fixed test corpus; <code>uploaded_<wbr>docs</code> stores every file uploaded through the UI.</td><td><code>.<wbr>txt</code> samples</td></tr>
+<tr><td><code>notebooks/</code></td><td>Dev / QA</td><td>Interactive debugging and testing of each module on its own, plus a FAISS index produced while running the notebook.</td><td><code>RAG_<wbr>Debugging_<wbr>Notebook.<wbr>ipynb</code></td></tr>
+<tr><td><code>vectorstores/</code></td><td>Data</td><td>Saved FAISS indexes. The path is <code>&lt;cwd&gt;/<wbr>vectorstores/&lt;provider&gt;_&lt;type&gt;_<wbr>index</code>, so where it ends up depends on the directory the process is started from.</td><td><code>index.<wbr>faiss</code>, <code>index.<wbr>pkl</code></td></tr>
+<tr><td><code>.<wbr>vscode/</code></td><td>Tooling</td><td>Workspace editor preferences.</td><td><code>settings.<wbr>json</code></td></tr>
+</tbody></table>
+
+<h2>3.3 File Reference</h2>
+<table>
+<thead><tr><th style="width:24%">File</th><th style="width:8%">LOC</th><th>Purpose</th><th style="width:30%">LangChain usage</th></tr></thead>
+<tbody>
+<tr><td><code>modules/<wbr>utils.<wbr>py</code></td><td>30</td><td>Loads <code>config/<wbr>.<wbr>env</code> when imported; factory that returns the configured embedding model.</td><td><span class="b lc">LC</span> <code>Open<wbr>AIEmbeddings</code>, <code>Google<wbr>Generative<wbr>AIEmbeddings</code></td></tr>
+<tr><td><code>modules/<wbr>loader.<wbr>py</code></td><td>62</td><td>Reads TXT/MD/PDF/DOCX files and URLs and converts them to <code>Document</code> objects with a <code>source</code> metadata field.</td><td><span class="b lc">LC</span> <code>langchain_<wbr>core.<wbr>documents.<wbr>Document</code></td></tr>
+<tr><td><code>modules/<wbr>splitter.<wbr>py</code></td><td>16</td><td>Splits documents into overlapping chunks and records <code>chunk_<wbr>index</code> in each chunk's metadata.</td><td><span class="b lc">LC</span> <code>Recursive<wbr>Character<wbr>Text<wbr>Splitter</code>, <code>Document</code></td></tr>
+<tr><td><code>modules/<wbr>embedder.<wbr>py</code></td><td>156</td><td>Creates or updates a FAISS index on disk, or creates/connects to a Pinecone index (with dimension checking) and upserts the chunks.</td><td><span class="b lc">LC</span> <code>FAISS</code>, <code>Pinecone<wbr>Vector<wbr>Store</code>, <code>Document</code></td></tr>
+<tr><td><code>modules/<wbr>retriever.<wbr>py</code></td><td>31</td><td>Wraps the vector store in a retriever — either plain similarity search or LLM-powered multi-query.</td><td><span class="b lc">LC</span> <code>as_<wbr>retriever</code>, <code>Multi<wbr>Query<wbr>Retriever</code>, chat models</td></tr>
+<tr><td><code>modules/<wbr>rag_<wbr>chain.<wbr>py</code></td><td>95</td><td>Builds the LCEL chain: parallel context + memory gathering → prompt → chat model.</td><td><span class="b lc">LC</span> <code>Chat<wbr>Prompt<wbr>Template</code>, <code>Runnable<wbr>Parallel</code>, <code>Runnable<wbr>Lambda</code>, <code>Chat<wbr>Open<wbr>AI</code>, <code>Chat<wbr>Google<wbr>Generative<wbr>AI</code></td></tr>
+<tr><td><code>modules/<wbr>memory.<wbr>py</code></td><td>112</td><td>Per-session message history, summary memory and a rolling window of recent turns; wraps the chain so memory is updated after each turn.</td><td><span class="b lc">LC</span> <code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code>, <code>Conversation<wbr>Summary<wbr>Memory</code>, <code>Runnable<wbr>Lambda</code>, <code>Runnable<wbr>With<wbr>Message<wbr>History</code></td></tr>
+<tr><td><code>modules/<wbr>_<wbr>_<wbr>init_<wbr>_<wbr>.<wbr>py</code></td><td>0</td><td>Package marker so modules can be imported as <code>modules.<wbr>xxx</code>.</td><td>—</td></tr>
+<tr><td><code>app/<wbr>streamlit_<wbr>app.<wbr>py</code></td><td>181</td><td>UI + orchestration: session management, document upload and ingestion, building the chain, chat loop.</td><td>Uses the LCEL chain via <code>.<wbr>invoke(.<wbr>.<wbr>.<wbr>, config=<wbr>{"configurable": {.<wbr>.<wbr>.<wbr>}})</code></td></tr>
+<tr><td><code>app/<wbr>gradio_<wbr>app.<wbr>py</code></td><td>0</td><td>Reserved for an alternative Gradio front end (not implemented).</td><td>—</td></tr>
+<tr><td><code>config/<wbr>config.<wbr>json</code></td><td>35</td><td>Runtime settings (providers, vector store, retriever, chunking).</td><td>Selects which LangChain integrations are created</td></tr>
+<tr><td><code>env-sample.<wbr>txt</code></td><td>5</td><td>Template listing the API keys needed in <code>config/<wbr>.<wbr>env</code>.</td><td>—</td></tr>
+<tr><td><code>requirements.<wbr>txt</code></td><td>44</td><td>Pinned dependency list for a reproducible environment.</td><td>Declares 7 LangChain packages</td></tr>
+<tr><td><code>template.<wbr>py</code></td><td>68</td><td>Scaffolding script that creates the folders and empty files.</td><td>—</td></tr>
+<tr><td><code>notebooks/<wbr>RAG_<wbr>Debugging_<wbr>Notebook.<wbr>ipynb</code></td><td>10 cells</td><td>Runs load → split → embed → search → retrieve → chain + memory one step at a time.</td><td>Calls every LangChain-backed module</td></tr>
+<tr><td><code>run_<wbr>app.<wbr>bat</code></td><td>0</td><td>Reserved Windows launcher (empty).</td><td>—</td></tr>
+<tr><td><code>README.<wbr>md</code></td><td>—</td><td>Repository landing page linking to this documentation.</td><td>—</td></tr>
+</tbody></table>
+</section>
+
+<!-- =====================================================================
+     4. ARCHITECTURE
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">4</span>System Architecture</h1>
+<h2>4.1 Layered Architecture</h2>
+<p>The system has four layers. The <b>presentation layer</b> handles user interaction. The <b>orchestration layer</b> (the body of <code>streamlit_app.py</code>) calls the pipeline stages in order. The <b>core RAG library</b> (<code>modules/</code>) contains one module per stage. The <b>provider layer</b> holds the external AI services and vector databases, reached only through LangChain's provider-neutral interfaces.</p>
+<figure>
+<svg width="780" height="540" viewBox="0 0 780 540">
+  <defs>
+    <marker id="a1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#13315C"/></marker>
+    <marker id="a1g" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#1C7C54"/></marker>
+  </defs>
+  <rect x="0" y="0" width="780" height="78" rx="10" fill="#FBEAEA"/><text x="14" y="20" font-size="10.5" font-weight="700" fill="#C0392B">PRESENTATION LAYER</text>
+  <rect x="0" y="88" width="780" height="78" rx="10" fill="#E8F0FA"/><text x="14" y="108" font-size="10.5" font-weight="700" fill="#13315C">ORCHESTRATION LAYER</text>
+  <rect x="0" y="176" width="780" height="168" rx="10" fill="#E6F4EC"/>
+  <rect x="0" y="420" width="780" height="116" rx="10" fill="#F3EEFA"/><text x="14" y="440" font-size="10.5" font-weight="700" fill="#5B3D99">PROVIDER LAYER · external services</text>
+  <g font-size="11" text-anchor="middle">
+  <rect x="190" y="28" width="250" height="40" rx="7" fill="#fff" stroke="#C0392B" stroke-width="1.5"/><text x="315" y="46" font-weight="700" fill="#1F2A37">Streamlit Chat UI</text><text x="315" y="60" font-size="9" fill="#5B6675">sessions · provider · memory toggle · upload</text>
+  <rect x="470" y="28" width="150" height="40" rx="7" fill="#fff" stroke="#C0392B" stroke-dasharray="4 3"/><text x="545" y="46" font-weight="700" fill="#8A94A3">Gradio UI</text><text x="545" y="60" font-size="9" fill="#8A94A3">placeholder</text>
+  <rect x="640" y="28" width="128" height="40" rx="7" fill="#fff" stroke="#C0392B"/><text x="704" y="46" font-weight="700" fill="#1F2A37">Jupyter Notebook</text><text x="704" y="60" font-size="9" fill="#5B6675">debug harness → modules</text>
+  <rect x="120" y="116" width="530" height="40" rx="7" fill="#fff" stroke="#13315C" stroke-width="1.5"/><text x="385" y="134" font-weight="700" fill="#1F2A37">streamlit_app.py — pipeline wiring</text><text x="385" y="148" font-size="9" fill="#5B6675">load config → ingest upload → build vector store → retriever → RAG chain → memory wrapper → invoke</text>
+  <rect x="18" y="210" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="88" y="231" font-weight="700" fill="#0E4D33">loader.py</text><text x="88" y="248" font-size="9" fill="#33534A">File/URL → Document</text>
+  <rect x="170" y="210" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="240" y="231" font-weight="700" fill="#0E4D33">splitter.py</text><text x="240" y="248" font-size="9" fill="#33534A">Recursive chunking</text>
+  <rect x="322" y="210" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="392" y="231" font-weight="700" fill="#0E4D33">embedder.py</text><text x="392" y="248" font-size="9" fill="#33534A">FAISS / Pinecone</text>
+  <rect x="474" y="210" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="544" y="231" font-weight="700" fill="#0E4D33">retriever.py</text><text x="544" y="248" font-size="9" fill="#33534A">Base / Multi-Query</text>
+  <rect x="626" y="210" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="696" y="231" font-weight="700" fill="#0E4D33">rag_chain.py</text><text x="696" y="248" font-size="9" fill="#33534A">LCEL RAG chain</text>
+  <rect x="18" y="280" width="140" height="52" rx="7" fill="#fff" stroke="#9AA5B1" stroke-dasharray="4 3"/><text x="88" y="301" font-weight="700" fill="#5B6675">config.json + .env</text><text x="88" y="318" font-size="9" fill="#5B6675">settings &amp; secrets</text>
+  <rect x="322" y="280" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="392" y="301" font-weight="700" fill="#0E4D33">utils.py</text><text x="392" y="318" font-size="9" fill="#33534A">.env · get_embedding_model()</text>
+  <rect x="626" y="280" width="140" height="52" rx="7" fill="#fff" stroke="#1C7C54" stroke-width="1.5"/><text x="696" y="301" font-weight="700" fill="#0E4D33">memory.py</text><text x="696" y="318" font-size="9" fill="#33534A">Summary + recent window</text>
+  <rect x="0" y="360" width="780" height="44" rx="8" fill="#0E4D33"/>
+  <text x="390" y="378" font-weight="700" fill="#fff" font-size="11.5">LangChain provider-neutral interfaces</text>
+  <text x="390" y="395" fill="#BFE8D2" font-size="9.5">Embeddings · VectorStore · BaseRetriever · BaseChatModel · BaseChatMessageHistory · Runnable</text>
+  <rect x="18" y="454" width="170" height="68" rx="7" fill="#fff" stroke="#7A5BB5"/><text x="103" y="476" font-weight="700" fill="#1F2A37">OpenAI API</text><text x="103" y="492" font-size="9" fill="#5B6675">gpt-4o-mini</text><text x="103" y="506" font-size="9" fill="#5B6675">OpenAI embeddings</text>
+  <rect x="204" y="454" width="170" height="68" rx="7" fill="#fff" stroke="#7A5BB5"/><text x="289" y="476" font-weight="700" fill="#1F2A37">Google Gemini API</text><text x="289" y="492" font-size="9" fill="#5B6675">gemini-2.5-flash</text><text x="289" y="506" font-size="9" fill="#5B6675">Gemini embeddings</text>
+  <rect x="390" y="454" width="170" height="68" rx="7" fill="#fff" stroke="#7A5BB5"/><text x="475" y="476" font-weight="700" fill="#1F2A37">FAISS (local disk)</text><text x="475" y="492" font-size="9" fill="#5B6675">index.faiss + index.pkl</text><text x="475" y="506" font-size="9" fill="#5B6675">in-process search</text>
+  <rect x="576" y="454" width="190" height="68" rx="7" fill="#fff" stroke="#7A5BB5"/><text x="671" y="476" font-weight="700" fill="#1F2A37">Pinecone (cloud)</text><text x="671" y="492" font-size="9" fill="#5B6675">serverless / pod index</text><text x="671" y="506" font-size="9" fill="#5B6675">cosine metric, namespaces</text>
+  </g>
+  <g stroke="#13315C" stroke-width="1.4" fill="none" marker-end="url(#a1)">
+    <line x1="315" y1="68" x2="315" y2="114"/>
+    <line x1="160" y1="156" x2="88" y2="208"/><line x1="240" y1="156" x2="240" y2="208"/><line x1="392" y1="156" x2="392" y2="208"/><line x1="530" y1="156" x2="544" y2="208"/><line x1="620" y1="156" x2="680" y2="208"/>
+    <line x1="392" y1="262" x2="392" y2="278"/><line x1="696" y1="262" x2="696" y2="278"/>
+    <line x1="158" y1="306" x2="320" y2="306" stroke-dasharray="4 3"/>
+  </g>
+  <g stroke="#1C7C54" stroke-width="1.6" fill="none" marker-end="url(#a1g)">
+    <line x1="240" y1="344" x2="240" y2="358"/><line x1="392" y1="344" x2="392" y2="358"/><line x1="544" y1="344" x2="544" y2="358"/><line x1="696" y1="344" x2="696" y2="358"/>
+    <line x1="103" y1="404" x2="103" y2="452"/><line x1="289" y1="404" x2="289" y2="452"/><line x1="475" y1="404" x2="475" y2="452"/><line x1="671" y1="404" x2="671" y2="452"/>
+  </g>
+  <text paint-order="stroke" stroke="#E6F4EC" stroke-width="6" stroke-linejoin="round" x="14" y="196" font-size="10.5" font-weight="700" fill="#0E4D33">CORE RAG LIBRARY · modules/ — built on LangChain</text>
+</svg>
+<figcaption>Figure 4-1 · Layered architecture. Arrows show call direction. The core library reaches every external service only through LangChain interfaces (dark-green band).</figcaption>
+</figure>
+
+<h2>4.2 Component Responsibilities</h2>
+<table>
+<thead><tr><th style="width:18%">Component</th><th style="width:20%">Input</th><th style="width:22%">Output</th><th>Responsibility</th></tr></thead>
+<tbody>
+<tr><td><b>Loader</b></td><td>File path or URL (<code>str</code>)</td><td><code>List[Document]</code></td><td>Turns any supported source into plain text plus <code>source</code> metadata. PDFs produce one Document per page.</td></tr>
+<tr><td><b>Splitter</b></td><td><code>List[Document]</code></td><td><code>List[Document]</code> (chunks)</td><td>Produces chunks small enough to embed and retrieve, with overlap so meaning is not cut off at chunk edges.</td></tr>
+<tr><td><b>Embedder</b></td><td>Chunks + config</td><td><code>Vector<wbr>Store</code></td><td>Embeds chunks and saves them to FAISS or Pinecone; loads an existing index and adds new chunks to it.</td></tr>
+<tr><td><b>Retriever</b></td><td><code>Vector<wbr>Store</code> + config</td><td><code>Base<wbr>Retriever</code></td><td>Returns the top-k most relevant chunks for a query (optionally widened by multi-query rewriting).</td></tr>
+<tr><td><b>RAG Chain</b></td><td>Retriever + config</td><td>LCEL <code>Runnable</code></td><td>Gathers context and memory in parallel, fills the prompt, calls the chat model.</td></tr>
+<tr><td><b>Memory</b></td><td>RAG chain + session id</td><td><code>Runnable<wbr>With<wbr>Message<wbr>History</code></td><td>Records every turn, keeps the summary up to date, maintains the recent-turn window, and keeps sessions separate.</td></tr>
+<tr><td><b>Utils</b></td><td>Provider name</td><td><code>Embeddings</code></td><td>Loads secrets and returns the matching embedding model.</td></tr>
+<tr><td><b>UI / Orchestrator</b></td><td>User actions</td><td>Rendered chat</td><td>Manages chat sessions and per-session settings, ingests uploads, calls the chain.</td></tr>
+</tbody></table>
+
+<h2>4.3 Design Principles</h2>
+<div class="grid2">
+  <div class="card lc"><h4>🔌 Provider-neutral interfaces</h4><p>Every external service is accessed through a LangChain base class (<code>Embeddings</code>, <code>VectorStore</code>, <code>BaseChatModel</code>, <code>BaseRetriever</code>). Switching from OpenAI to Gemini, or from FAISS to Pinecone, means changing a config value — the downstream code stays the same.</p></div>
+  <div class="card navy"><h4>⚙️ Configuration-driven</h4><p><code>config.json</code> decides which embedding provider, vector store, retriever and LLM are used; <code>.env</code> holds the secrets. Factory functions (<code>get_embedding_model</code>, <code>build_or_update_vectorstore</code>, <code>get_retriever</code>, <code>build_rag_chain</code>) read the config and build the matching objects.</p></div>
+  <div class="card lc"><h4>🔗 Composition with LCEL</h4><p>The chain is built with the <code>|</code> operator and a <code>RunnableParallel</code> map rather than as one large function. Every stage is a <code>Runnable</code>, so it supports <code>invoke</code>, <code>batch</code> and <code>stream</code>, and is traced automatically in LangSmith.</p></div>
+  <div class="card amber"><h4>🧩 One module per pipeline stage</h4><p>Each pipeline stage is a separate module with a small functional API. The notebook can test each stage independently, and a new front end (for example Gradio) can reuse the whole library without changes.</p></div>
+  <div class="card navy"><h4>👥 Session isolation</h4><p>All memory stores are dictionaries keyed by a session UUID, and the session id is passed through LangChain's <code>configurable</code> runtime config, so several chats can run side by side without sharing context.</p></div>
+  <div class="card amber"><h4>♻️ Incremental indexing</h4><p>An existing FAISS index is loaded and new chunks are added to it (<code>add_documents</code>) instead of rebuilding it. For Pinecone, the index is created once and later uploads are upserted.</p></div>
+</div>
+
+<h2>4.4 Module Dependency Graph</h2>
+<figure>
+<svg width="760" height="190" viewBox="0 0 760 190">
+  <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5B6675"/></marker></defs>
+  <g font-size="11" text-anchor="middle" font-weight="700">
+    <rect x="300" y="8" width="160" height="34" rx="17" fill="#C0392B"/><text x="380" y="30" fill="#fff">app/streamlit_app.py</text>
+    <rect x="10" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="65" y="101" fill="#fff">loader</text>
+    <rect x="135" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="190" y="101" fill="#fff">splitter</text>
+    <rect x="260" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="315" y="101" fill="#fff">embedder</text>
+    <rect x="385" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="440" y="101" fill="#fff">retriever</text>
+    <rect x="510" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="565" y="101" fill="#fff">rag_chain</text>
+    <rect x="635" y="80" width="110" height="32" rx="6" fill="#1C7C54"/><text x="690" y="101" fill="#fff">memory</text>
+    <rect x="320" y="150" width="120" height="32" rx="6" fill="#0E4D33"/><text x="380" y="171" fill="#fff">utils</text>
+  </g>
+  <g stroke="#5B6675" stroke-width="1.3" fill="none" marker-end="url(#a2)">
+    <line x1="320" y1="42" x2="70" y2="78"/><line x1="335" y1="42" x2="190" y2="78"/><line x1="360" y1="42" x2="318" y2="78"/><line x1="400" y1="42" x2="440" y2="78"/><line x1="425" y1="42" x2="560" y2="78"/><line x1="445" y1="42" x2="685" y2="78"/>
+    <line x1="315" y1="112" x2="360" y2="148"/><line x1="440" y1="112" x2="400" y2="148" stroke-dasharray="4 3"/>
+    <line x1="620" y1="96" x2="633" y2="96"/>
+  </g>
+  
+  <text x="470" y="140" font-size="9" fill="#5B6675">(unused import)</text>
+</svg>
+<figcaption>Figure 4-2 · Import graph. <code>rag_chain</code> imports <code>memory</code> to read summary and recent context; <code>retriever</code> imports <code>utils</code> but does not use it.</figcaption>
+</figure>
+</section>
+
+<!-- =====================================================================
+     5. WORKFLOW
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">5</span>End-to-End Workflow</h1>
+<p>The application has two pipelines: an <b>ingestion pipeline</b> that runs when a document is uploaded, and a <b>question-answering pipeline</b> that runs for every chat message. Both run inside Streamlit's top-to-bottom script execution model (section 5.3).</p>
+
+<h2>5.1 Ingestion Pipeline (Indexing)</h2>
+<figure>
+<svg width="780" height="150" viewBox="0 0 780 150">
+  <defs><marker id="a3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0F9D8A"/></marker></defs>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="4" y="30" width="110" height="70" rx="8" fill="#FBEAEA" stroke="#C0392B"/><text x="59" y="55" font-weight="700">① Upload</text><text x="59" y="72" font-size="9" fill="#5B6675">st.file_uploader</text><text x="59" y="86" font-size="9" fill="#5B6675">PDF/DOCX/TXT</text>
+    <rect x="134" y="30" width="110" height="70" rx="8" fill="#E8F0FA" stroke="#13315C"/><text x="189" y="55" font-weight="700">② Persist</text><text x="189" y="72" font-size="9" fill="#5B6675">data/uploaded_docs/</text><text x="189" y="86" font-size="9" fill="#5B6675">&lt;filename&gt;</text>
+    <rect x="264" y="30" width="110" height="70" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="319" y="55" font-weight="700">③ Load</text><text x="319" y="72" font-size="9" fill="#33534A">load_document()</text><text x="319" y="86" font-size="9" fill="#1C7C54">→ Document[]</text>
+    <rect x="394" y="30" width="110" height="70" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="449" y="55" font-weight="700">④ Split</text><text x="449" y="72" font-size="9" fill="#33534A">split_documents()</text><text x="449" y="86" font-size="9" fill="#1C7C54">size 400 / overlap 50</text>
+    <rect x="524" y="30" width="110" height="70" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="579" y="55" font-weight="700">⑤ Embed</text><text x="579" y="72" font-size="9" fill="#33534A">get_embedding_model()</text><text x="579" y="86" font-size="9" fill="#1C7C54">Embeddings</text>
+    <rect x="654" y="30" width="120" height="70" rx="8" fill="#E6F4EC" stroke="#1C7C54"/><text x="714" y="55" font-weight="700">⑥ Index</text><text x="714" y="72" font-size="9" fill="#33534A">FAISS.add_documents</text><text x="714" y="86" font-size="9" fill="#1C7C54">save_local / Pinecone</text>
+  </g>
+  <g stroke="#0F9D8A" stroke-width="2" marker-end="url(#a3)"><line x1="114" y1="65" x2="132" y2="65"/><line x1="244" y1="65" x2="262" y2="65"/><line x1="374" y1="65" x2="392" y2="65"/><line x1="504" y1="65" x2="522" y2="65"/><line x1="634" y1="65" x2="652" y2="65"/></g>
+  <text x="390" y="130" font-size="9.5" fill="#5B6675" text-anchor="middle" font-style="italic">Steps ③–⑥ use LangChain abstractions (green) · triggered in app/streamlit_app.py lines 111–124</text>
+</svg>
+<figcaption>Figure 5-1 · Ingestion pipeline.</figcaption>
+</figure>
+<table>
+<thead><tr><th style="width:5%">#</th><th style="width:18%">Stage</th><th style="width:26%">Code</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Upload</td><td><code>streamlit_<wbr>app.<wbr>py:102</code></td><td>User selects a file; Streamlit holds it in memory as an <code>Uploaded<wbr>File</code>.</td></tr>
+<tr><td>2</td><td>Persist</td><td><code>streamlit_<wbr>app.<wbr>py:113-118</code></td><td>File bytes are written to <code>data/<wbr>uploaded_<wbr>docs/&lt;name&gt;</code>, creating the folder if needed.</td></tr>
+<tr><td>3</td><td>Load <span class="b lc">LC</span></td><td><code>loader.<wbr>load_<wbr>document</code></td><td>Chooses a parser by extension or URL scheme and returns <code>Document(page_<wbr>content, metadata=<wbr>{"source": .<wbr>.<wbr>.<wbr>})</code> objects.</td></tr>
+<tr><td>4</td><td>Split <span class="b lc">LC</span></td><td><code>splitter.<wbr>split_<wbr>documents</code></td><td><code>Recursive<wbr>Character<wbr>Text<wbr>Splitter(400, 50)</code> splits each document and adds <code>chunk_<wbr>index</code> to the metadata.</td></tr>
+<tr><td>5</td><td>Embed <span class="b lc">LC</span></td><td><code>utils.<wbr>get_<wbr>embedding_<wbr>model</code></td><td>Creates <code>Open<wbr>AIEmbeddings</code> or <code>Google<wbr>Generative<wbr>AIEmbeddings</code> based on <code>embedding_<wbr>provider</code>.</td></tr>
+<tr><td>6</td><td>Index <span class="b lc">LC</span></td><td><code>embedder.<wbr>build_<wbr>or_<wbr>update_<wbr>vectorstore</code></td><td>FAISS: load the existing index and call <code>add_<wbr>documents</code>, or <code>from_<wbr>documents</code> for a new index → <code>save_<wbr>local</code>. Pinecone: create/verify the index → <code>Pinecone<wbr>Vector<wbr>Store.<wbr>from_<wbr>documents</code> (upsert).</td></tr>
+</tbody></table>
+
+<h2>5.2 Question-Answering Pipeline (Retrieval + Generation)</h2>
+<figure>
+<svg width="780" height="345" viewBox="0 0 780 345">
+  <defs><marker id="a4" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#13315C"/></marker></defs>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="4" y="10" width="130" height="48" rx="8" fill="#FBEAEA" stroke="#C0392B"/><text x="69" y="31" font-weight="700">User question</text><text x="69" y="46" font-size="9" fill="#5B6675">st.chat_input</text>
+    <rect x="160" y="10" width="200" height="48" rx="8" fill="#0E4D33"/><text x="260" y="31" font-weight="700" fill="#fff">RunnableWithMessageHistory</text><text x="260" y="46" font-size="9" fill="#BFE8D2">injects history · records messages</text>
+    <rect x="386" y="10" width="190" height="48" rx="8" fill="#1C7C54"/><text x="481" y="31" font-weight="700" fill="#fff">RunnableLambda</text><text x="481" y="46" font-size="9" fill="#D7F0E2">chain_with_summary()</text>
+    <!-- parallel box -->
+    <rect x="4" y="82" width="772" height="132" rx="10" fill="#E6F4EC" stroke="#1C7C54" stroke-dasharray="5 3"/>
+    <text x="16" y="99" font-size="10" font-weight="700" fill="#0E4D33" text-anchor="start">RunnableParallel — five branches run concurrently</text>
+    <rect x="16" y="108" width="226" height="94" rx="7" fill="#fff" stroke="#1C7C54"/><text x="129" y="126" font-weight="700" fill="#0E4D33">context</text>
+    <text x="129" y="143" font-size="9" fill="#33534A">λ x["question"]</text><text x="129" y="157" font-size="9" fill="#33534A">│ retriever (top-k chunks)</text><text x="129" y="171" font-size="9" fill="#33534A">│ λ combine_docs → str</text><text x="129" y="190" font-size="8.5" fill="#1C7C54">FAISS / Pinecone similarity search</text>
+    <rect x="252" y="108" width="120" height="94" rx="7" fill="#fff" stroke="#1C7C54"/><text x="312" y="126" font-weight="700" fill="#0E4D33">question</text><text x="312" y="150" font-size="9" fill="#33534A">λ x["question"]</text><text x="312" y="168" font-size="9" fill="#33534A">pass-through</text>
+    <rect x="382" y="108" width="120" height="94" rx="7" fill="#fff" stroke="#1C7C54"/><text x="442" y="126" font-weight="700" fill="#0E4D33">system_prompt</text><text x="442" y="150" font-size="9" fill="#33534A">λ _ → constant</text><text x="442" y="168" font-size="9" fill="#33534A">role instructions</text>
+    <rect x="512" y="108" width="122" height="94" rx="7" fill="#fff" stroke="#1C7C54"/><text x="573" y="126" font-weight="700" fill="#0E4D33">memory_summary</text><text x="573" y="150" font-size="9" fill="#33534A">λ x, config →</text><text x="573" y="164" font-size="9" fill="#33534A">get_memory_summary</text><text x="573" y="178" font-size="9" fill="#33534A">(session_id)</text>
+    <rect x="644" y="108" width="122" height="94" rx="7" fill="#fff" stroke="#1C7C54"/><text x="705" y="126" font-weight="700" fill="#0E4D33">recent_memory</text><text x="705" y="150" font-size="9" fill="#33534A">λ x, config →</text><text x="705" y="164" font-size="9" fill="#33534A">get_recent_context</text><text x="705" y="178" font-size="9" fill="#33534A">(session_id, n=2)</text>
+    <!-- prompt, llm -->
+    <rect x="150" y="238" width="200" height="46" rx="8" fill="#1C7C54"/><text x="250" y="258" font-weight="700" fill="#fff">ChatPromptTemplate</text><text x="250" y="273" font-size="9" fill="#D7F0E2">5 variables → HumanMessage</text>
+    <rect x="390" y="238" width="200" height="46" rx="8" fill="#1C7C54"/><text x="490" y="258" font-weight="700" fill="#fff">ChatOpenAI | ChatGoogleGenAI</text><text x="490" y="273" font-size="9" fill="#D7F0E2">→ AIMessage</text>
+    <rect x="620" y="238" width="156" height="46" rx="8" fill="#E8F0FA" stroke="#13315C"/><text x="698" y="258" font-weight="700">Post-processing</text><text x="698" y="273" font-size="9" fill="#5B6675">save_context · update_recent</text>
+    <rect x="300" y="300" width="200" height="38" rx="8" fill="#FBEAEA" stroke="#C0392B"/><text x="400" y="323" font-weight="700">Rendered answer (st.markdown)</text>
+  </g>
+  <g stroke="#13315C" stroke-width="1.6" fill="none" marker-end="url(#a4)">
+    <line x1="134" y1="34" x2="158" y2="34"/><line x1="360" y1="34" x2="384" y2="34"/><line x1="481" y1="58" x2="481" y2="80"/>
+    <path d="M200,214 L230,236"/><line x1="350" y1="261" x2="388" y2="261"/><line x1="590" y1="261" x2="618" y2="261"/><path d="M698,284 L698,319 L502,319"/>
+  </g>
+</svg>
+<figcaption>Figure 5-2 · Question-answering pipeline. Every dark-green box is a LangChain Runnable.</figcaption>
+</figure>
+<table class="lc">
+<thead><tr><th style="width:5%">#</th><th style="width:22%">Step</th><th>Detail</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Invoke with session</td><td><code>rag_<wbr>chain_<wbr>with_<wbr>memory.<wbr>invoke({"question": prompt}, config=<wbr>{"configurable": {"session_<wbr>id": sid}})</code> — <code>streamlit_<wbr>app.<wbr>py:168</code>.</td></tr>
+<tr><td>2</td><td>History injection</td><td><code>Runnable<wbr>With<wbr>Message<wbr>History</code> loads the session's <code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code>, adds it to the input as <code>history</code>, and records the human message.</td></tr>
+<tr><td>3</td><td>Wrapper lambda</td><td><code>chain_<wbr>with_<wbr>summary(input_<wbr>data, config)</code> calls the inner RAG chain and passes the <i>same</i> config on, so the session id reaches the inner branches.</td></tr>
+<tr><td>4</td><td>Parallel fan-out</td><td><code>Runnable<wbr>Parallel</code> runs the five branches concurrently in a thread pool: retrieval, question pass-through, system prompt, summary memory and recent-turn memory.</td></tr>
+<tr><td>5</td><td>Retrieval</td><td>The retriever embeds the question with the same embedding model and returns the k nearest chunks; <code>combine_<wbr>docs</code> joins them with blank lines (or returns <i>“No relevant context found.”</i>).</td></tr>
+<tr><td>6</td><td>Prompt formatting</td><td><code>Chat<wbr>Prompt<wbr>Template.<wbr>from_<wbr>template</code> fills the five variables into a single human message.</td></tr>
+<tr><td>7</td><td>Generation</td><td>The chat model chosen for the session produces an <code>AIMessage</code>.</td></tr>
+<tr><td>8</td><td>Memory update</td><td>The wrapper saves the turn to summary memory (which asks the LLM to update the running summary), adds it to the rolling window, and returns the response. <code>Runnable<wbr>With<wbr>Message<wbr>History</code> then records the AI message.</td></tr>
+<tr><td>9</td><td>Render</td><td>The UI reads <code>response.<wbr>content</code>, displays it, and adds it to the session's visible chat history.</td></tr>
+</tbody></table>
+
+<h2>5.3 Streamlit Run Lifecycle</h2>
+<p>Streamlit runs <code>streamlit_app.py</code> from top to bottom on <b>every</b> user interaction (button click, toggle, chat message). Knowing this order is important for understanding how the application behaves and performs:</p>
+<table class="teal" style="break-inside:avoid">
+<thead><tr><th style="width:6%">Order</th><th style="width:22%">Phase</th><th style="width:16%">Lines</th><th>Behaviour on each rerun</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Bootstrap</td><td>1–23</td><td>Adds the project root to <code>sys.<wbr>path</code>, imports modules (the first import of <code>utils</code> loads <code>.<wbr>env</code>), sets the page config, reads <code>config.<wbr>json</code>.</td></tr>
+<tr><td>2</td><td>Session state init</td><td>27–57</td><td>Creates <code>chat_<wbr>sessions</code> / <code>active_<wbr>session</code> once; the <i>New Chat</i> button adds a UUID-keyed session.</td></tr>
+<tr><td>3</td><td>Sidebar controls</td><td>60–104</td><td>Session selector, per-session LLM provider, per-session memory toggle, file uploader.</td></tr>
+<tr><td>4</td><td>Ingestion</td><td>111–124</td><td>Runs whenever the uploader holds a file (see finding F-01 in section 10).</td></tr>
+<tr><td>5</td><td>Backend build</td><td>129–144</td><td>Loads the vector store (<code>docs=<wbr>[]</code>), builds the retriever, applies the session's provider to <code>CONFIG</code>, builds the RAG chain and memory wrapper. Any exception stops the page with an error.</td></tr>
+<tr><td>6</td><td>Chat render</td><td>150–182</td><td>Shows earlier messages; on new input, calls the chain and adds both messages to the session's history.</td></tr>
+</tbody></table>
+</section>
+
+<!-- =====================================================================
+     6. LANGCHAIN USAGE
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">6</span>LangChain Framework Usage</h1>
+<p>This chapter lists every place the project uses LangChain, explains each LangChain concept in the context of this codebase, and then walks through the central LCEL chain in detail.</p>
+
+<h2>6.1 LangChain Usage Map</h2>
+<table class="lc">
+<thead><tr><th style="width:4%">#</th><th style="width:22%">LangChain class / API</th><th style="width:21%">Import path</th><th style="width:17%">Used in</th><th>What it does in this project</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>Document</code></td><td><code>langchain_<wbr>core.<wbr>documents</code></td><td>loader:10 · splitter:16 · embedder</td><td>The standard data unit: <code>page_<wbr>content</code> + <code>metadata</code>. Every stage takes and returns Documents.</td></tr>
+<tr><td>2</td><td><code>Recursive<wbr>Character<wbr>Text<wbr>Splitter</code></td><td><code>langchain_<wbr>text_<wbr>splitters</code> / <code>langchain.<wbr>text_<wbr>splitter</code></td><td>splitter:8</td><td>Splits text hierarchically on <code>\n\n</code>, <code>\n</code>, space, then characters, until each chunk is within <code>chunk_<wbr>size</code>.</td></tr>
+<tr><td>3</td><td><code>Open<wbr>AIEmbeddings</code></td><td><code>langchain_<wbr>openai</code></td><td>utils:23</td><td>Converts text to vectors with OpenAI's embedding API (default model, 1536-dim).</td></tr>
+<tr><td>4</td><td><code>Google<wbr>Generative<wbr>AIEmbeddings</code></td><td><code>langchain_<wbr>google_<wbr>genai</code></td><td>utils:29</td><td>Converts text to vectors with a Gemini embedding model.</td></tr>
+<tr><td>5</td><td><code>FAISS</code></td><td><code>langchain_<wbr>community.<wbr>vectorstores</code></td><td>embedder:64-79</td><td><code>from_<wbr>documents</code>, <code>load_<wbr>local</code>, <code>add_<wbr>documents</code>, <code>save_<wbr>local</code>, <code>similarity_<wbr>search</code>.</td></tr>
+<tr><td>6</td><td><code>Chroma</code></td><td><code>langchain_<wbr>community.<wbr>vectorstores</code></td><td>embedder:13</td><td>Imported for future local-store support; not used yet.</td></tr>
+<tr><td>7</td><td><code>Pinecone<wbr>Vector<wbr>Store</code></td><td><code>langchain_<wbr>pinecone</code></td><td>embedder:148</td><td><code>from_<wbr>documents</code> embeds and upserts chunks into a Pinecone index/namespace.</td></tr>
+<tr><td>8</td><td><code>Vector<wbr>Store.<wbr>as_<wbr>retriever()</code></td><td><code>langchain_<wbr>core.<wbr>vectorstores</code></td><td>retriever:15,28</td><td>Wraps a store in a <code>Vector<wbr>Store<wbr>Retriever</code> (a Runnable) with <code>search_<wbr>kwargs=<wbr>{"k": 3}</code>.</td></tr>
+<tr><td>9</td><td><code>Multi<wbr>Query<wbr>Retriever</code></td><td><code>langchain.<wbr>retrievers</code></td><td>retriever:27</td><td>Uses an LLM to write alternative phrasings of the question, retrieves for each, and returns the de-duplicated union.</td></tr>
+<tr><td>10</td><td><code>Chat<wbr>Open<wbr>AI</code></td><td><code>langchain_<wbr>openai</code></td><td>rag_chain:22 · retriever:21 · memory:30</td><td>Chat model for answers (gpt-4o-mini, streaming), query rewriting, and summarisation.</td></tr>
+<tr><td>11</td><td><code>Chat<wbr>Google<wbr>Generative<wbr>AI</code></td><td><code>langchain_<wbr>google_<wbr>genai</code></td><td>rag_chain:28 · retriever:23</td><td>Gemini 2.5 Flash chat model, used when <code>llm_<wbr>provider=<wbr>"gemini"</code>.</td></tr>
+<tr><td>12</td><td><code>Chat<wbr>Prompt<wbr>Template</code></td><td><code>langchain.<wbr>prompts</code> (→ core)</td><td>rag_chain:46</td><td>Template with five variables, turned into chat messages.</td></tr>
+<tr><td>13</td><td><code>Runnable<wbr>Parallel</code></td><td><code>langchain.<wbr>schema.<wbr>runnable</code> (→ core)</td><td>rag_chain:77</td><td>Runs the five input branches concurrently and returns a dict.</td></tr>
+<tr><td>14</td><td><code>Runnable<wbr>Lambda</code></td><td><code>langchain.<wbr>schema.<wbr>runnable</code> (→ core)</td><td>rag_chain:79-87 · memory:94</td><td>Turns plain Python functions into Runnables; functions that take a <code>config</code> parameter receive the runtime config.</td></tr>
+<tr><td>15</td><td><code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code></td><td><code>langchain_<wbr>core.<wbr>chat_<wbr>history</code></td><td>memory:23</td><td>In-process list of <code>Human<wbr>Message</code>/<code>AIMessage</code> objects for each session.</td></tr>
+<tr><td>16</td><td><code>Conversation<wbr>Summary<wbr>Memory</code></td><td><code>langchain.<wbr>memory</code></td><td>memory:29</td><td>Keeps an LLM-generated running summary of the conversation.</td></tr>
+<tr><td>17</td><td><code>Runnable<wbr>With<wbr>Message<wbr>History</code></td><td><code>langchain_<wbr>core.<wbr>runnables.<wbr>history</code></td><td>memory:96</td><td>Wraps a Runnable so each call reads and writes a session-scoped chat history.</td></tr>
+<tr><td>18</td><td><code>Prompt<wbr>Template</code>, <code>LLMChain</code></td><td><code>langchain.<wbr>prompts</code>, <code>langchain.<wbr>chains</code></td><td>retriever:2-3</td><td>Imported but unused (left over from an earlier version).</td></tr>
+</tbody></table>
+
+<h2>6.2 LangChain Concepts Explained in Project Context</h2>
+
+<h3>6.2.1 Document — the common data unit</h3>
+<p>A <code>Document</code> is a small object with two fields: <code>page_content: str</code> and <code>metadata: dict</code>. All loaders in <code>loader.py</code> produce Documents, the splitter turns one Document into many, and the vector store keeps the metadata next to each vector so retrieved chunks can be traced back to their source file and page.</p>
+<pre><span class="c"># loader.py:10 — the factory every loader goes through</span>
+<span class="k">def</span> <span class="f">text_to_doc</span>(text: str, source: str = <span class="s">"inline"</span>) -&gt; <span class="lc">Document</span>:
+    <span class="k">return</span> <span class="lc">Document</span>(page_content = text, metadata = {<span class="s">"source"</span>: source})</pre>
+
+<h3>6.2.2 Text Splitters — chunking for retrieval</h3>
+<p>Embedding models have input limits, and retrieval works better when each chunk covers one idea. <code>RecursiveCharacterTextSplitter</code> tries separators in order <code>["\n\n", "\n", " ", ""]</code>: it first splits on paragraphs, splits further only where a piece is still larger than <code>chunk_size</code>, then merges small pieces back up to the limit while keeping <code>chunk_overlap</code> characters shared between neighbouring chunks.</p>
+
+<h3>6.2.3 Embeddings — the provider-neutral vector interface</h3>
+<p>Both <code>OpenAIEmbeddings</code> and <code>GoogleGenerativeAIEmbeddings</code> implement the <code>Embeddings</code> interface, which has two methods: <code>embed_documents(list[str])</code> for indexing and <code>embed_query(str)</code> for searching. <code>embedder.py</code> uses this interface to measure the vector size (<code>len(embed_documents(["Hello world!"])[0])</code>) before creating a Pinecone index.</p>
+
+<h3>6.2.4 Vector Stores — FAISS and Pinecone behind one interface</h3>
+<table class="lc">
+<thead><tr><th style="width:26%">Operation</th><th style="width:37%">FAISS (local)</th><th>Pinecone (cloud)</th></tr></thead>
+<tbody>
+<tr><td>Create from chunks</td><td><code>FAISS.<wbr>from_<wbr>documents(docs, emb)</code></td><td><code>Pinecone<wbr>Vector<wbr>Store.<wbr>from_<wbr>documents(docs, embedding=<wbr>emb, index_<wbr>name, namespace)</code></td></tr>
+<tr><td>Load existing</td><td><code>FAISS.<wbr>load_<wbr>local(dir, embeddings, allow_<wbr>dangerous_<wbr>deserialization=<wbr>True)</code></td><td>Index already exists on the server — <code>from_<wbr>documents</code> connects to it</td></tr>
+<tr><td>Add new chunks</td><td><code>vectorstore.<wbr>add_<wbr>documents(docs)</code></td><td>Upsert happens inside <code>from_<wbr>documents</code></td></tr>
+<tr><td>Persist</td><td><code>save_<wbr>local(dir)</code> → <code>index.<wbr>faiss</code> + <code>index.<wbr>pkl</code></td><td>Automatic (managed service)</td></tr>
+<tr><td>Search</td><td colspan="2">Same API for both: <code>similarity_<wbr>search(query, k)</code> / <code>as_<wbr>retriever()</code></td></tr>
+</tbody></table>
+<div class="call warn"><div class="t">⚠ Security note — <code>allow_dangerous_deserialization=True</code></div><p>FAISS saves its docstore with Python <code>pickle</code>. LangChain requires this flag as an explicit acknowledgement, because loading a pickle file from an untrusted source can execute arbitrary code. That is acceptable here because the index is always created locally by the application. Never load an <code>index.pkl</code> received from someone else.</p></div>
+
+<h3>6.2.5 Retrievers — from vectors to relevant chunks</h3>
+<p>A retriever is any Runnable that takes a query string and returns <code>List[Document]</code>. Because it is a Runnable, it can be placed directly in an LCEL pipe (<code>... | retriever | ...</code>), which is how <code>rag_chain.py</code> uses it. The project supports two kinds:</p>
+<div class="grid2">
+<div class="card lc"><h4>Base retriever</h4><p><code>vectorstore.as_retriever(search_kwargs={"k":3})</code>. Embeds the question once and returns the 3 nearest chunks. One embedding call, no LLM call — fast and inexpensive.</p></div>
+<div class="card lc"><h4>MultiQueryRetriever</h4><p>An LLM (temperature 0) writes several alternative phrasings of the question; each is searched separately and the results are merged and de-duplicated. Improves recall for vague or ambiguous questions, at the cost of one extra LLM call and several searches.</p></div>
+</div>
+
+<h3>6.2.6 Chat Models — interchangeable LLMs</h3>
+<p><code>ChatOpenAI</code> and <code>ChatGoogleGenerativeAI</code> both implement <code>BaseChatModel</code>: they take a list of messages (or a <code>PromptValue</code>) and return an <code>AIMessage</code>. <code>build_rag_chain</code> chooses one based on <code>llm_provider</code> and places it at the end of the pipe; the rest of the chain is identical for both. <code>streaming=True</code> is set so a later UI change can use <code>chain.stream()</code> to show tokens as they arrive.</p>
+
+<h3>6.2.7 Prompt Templates</h3>
+<p><code>ChatPromptTemplate.from_template(...)</code> creates a template containing a single human message with the placeholders <code>{system_prompt}</code>, <code>{memory_summary}</code>, <code>{recent_memory}</code>, <code>{context}</code> and <code>{question}</code>. It is a Runnable that takes a dict with those keys — exactly what the preceding <code>RunnableParallel</code> returns.</p>
+
+<h3>6.2.8 LCEL Runnables — the composition layer</h3>
+<table class="lc">
+<thead><tr><th style="width:24%">Primitive</th><th>Semantics</th><th style="width:30%">Where used</th></tr></thead>
+<tbody>
+<tr><td><code>a | b</code> (RunnableSequence)</td><td>Passes the output of <code>a</code> as the input of <code>b</code>. The combined object is itself a Runnable.</td><td>context branch; <code>parallel | prompt | llm</code></td></tr>
+<tr><td><code>Runnable<wbr>Parallel({.<wbr>.<wbr>.<wbr>})</code></td><td>Sends the same input to every branch, runs them concurrently, and returns a dict of their outputs.</td><td><code>rag_<wbr>chain.<wbr>py:77</code></td></tr>
+<tr><td><code>Runnable<wbr>Lambda(fn)</code></td><td>Wraps a Python function. If <code>fn</code> has a parameter named <code>config</code>, LangChain passes in the current <code>Runnable<wbr>Config</code>.</td><td>question/context extraction, memory lookups, <code>chain_<wbr>with_<wbr>summary</code></td></tr>
+<tr><td><code>Runnable<wbr>With<wbr>Message<wbr>History</code></td><td>Adds stored history to the input, runs the wrapped Runnable, and saves the new messages, keyed by <code>configurable.<wbr>session_<wbr>id</code>.</td><td><code>memory.<wbr>py:96</code></td></tr>
+</tbody></table>
+
+<h3>6.2.9 Memory — chat history and summary memory</h3>
+<p><code>InMemoryChatMessageHistory</code> is the low-level store (a list of messages). <code>ConversationSummaryMemory</code> is a higher-level helper from the classic <code>langchain.memory</code> API. It shares the same message history and uses an LLM to keep a short running summary up to date (<code>save_context</code> → <code>predict_new_summary</code>). The project adds its own <i>rolling window</i> of the last <i>n</i> turns (plain Python), giving <b>hybrid memory</b>: the summary keeps long-range context compact, and the window keeps the exact wording of the latest exchanges.</p>
+
+<h2>6.3 Anatomy of the LCEL RAG Chain</h2>
+<span class="file">modules/rag_chain.py · lines 76–92</span>
+<pre>rag_chain = (
+    <span class="lc">RunnableParallel</span>(
+        {
+            <span class="s">"context"</span>:  <span class="lc">RunnableLambda</span>(<span class="k">lambda</span> x: x[<span class="s">"question"</span>]) | retriever | <span class="lc">RunnableLambda</span>(combine_docs),
+            <span class="s">"question"</span>: <span class="lc">RunnableLambda</span>(<span class="k">lambda</span> x: x[<span class="s">"question"</span>]),
+            <span class="s">"system_prompt"</span>: <span class="lc">RunnableLambda</span>(<span class="k">lambda</span> _: system_prompt),
+            <span class="s">"memory_summary"</span>: <span class="lc">RunnableLambda</span>(
+                <span class="k">lambda</span> x, config: get_memory_summary(config[<span class="s">"configurable"</span>][<span class="s">"session_id"</span>])
+            ),
+            <span class="s">"recent_memory"</span>: <span class="lc">RunnableLambda</span>(
+                <span class="k">lambda</span> x, config: get_recent_context(config[<span class="s">"configurable"</span>][<span class="s">"session_id"</span>])
+            ),
+        }
+    )
+    | prompt     <span class="c"># ChatPromptTemplate  : dict  → ChatPromptValue</span>
+    | llm        <span class="c"># ChatOpenAI / Gemini : prompt → AIMessage</span>
+)</pre>
+<table class="lc">
+<thead><tr><th style="width:18%">Stage</th><th style="width:26%">Input type</th><th style="width:26%">Output type</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Chain input</td><td>—</td><td><code>{"question": str, "history": [.<wbr>.<wbr>.<wbr>]}</code></td><td><code>history</code> is added by <code>Runnable<wbr>With<wbr>Message<wbr>History</code>; the prompt does not use it.</td></tr>
+<tr><td>RunnableParallel</td><td>input dict</td><td><code>{context, question, system_<wbr>prompt, memory_<wbr>summary, recent_<wbr>memory}</code></td><td>Branches run concurrently in a thread pool.</td></tr>
+<tr><td>prompt</td><td>5-key dict</td><td><code>Chat<wbr>Prompt<wbr>Value</code> (1 HumanMessage)</td><td>Placeholders filled with plain string formatting.</td></tr>
+<tr><td>llm</td><td><code>Chat<wbr>Prompt<wbr>Value</code></td><td><code>AIMessage</code></td><td><code>.<wbr>content</code> holds the answer text.</td></tr>
+</tbody></table>
+
+<h2>6.4 How the Session ID Reaches the Memory Lookups</h2>
+<p>The session id is never part of the chain's <i>input data</i>; it travels in LangChain's <b>runtime config</b>, which LCEL automatically passes down to every nested Runnable:</p>
+<pre><span class="c"># 1. UI passes the id in config (streamlit_app.py:168)</span>
+rag_chain_with_memory.<span class="f">invoke</span>({<span class="s">"question"</span>: prompt},
+    config={<span class="s">"configurable"</span>: {<span class="s">"session_id"</span>: st.session_state.active_session}})
+
+<span class="c"># 2. RunnableWithMessageHistory reads configurable.session_id to pick the history</span>
+<span class="c"># 3. It calls RunnableLambda(chain_with_summary) — which takes `config`, so LangChain passes it in</span>
+<span class="k">def</span> <span class="f">chain_with_summary</span>(input_data, config=<span class="k">None</span>):
+    response = rag_chain.<span class="f">invoke</span>(input_data, config=config)   <span class="c"># 4. forwarded explicitly</span>
+
+<span class="c"># 5. Inside RunnableParallel, these two-parameter lambdas receive the same config</span>
+<span class="lc">RunnableLambda</span>(<span class="k">lambda</span> x, config: get_memory_summary(config[<span class="s">"configurable"</span>][<span class="s">"session_id"</span>]))</pre>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action — why config, not input?</div><p>Keeping the session id in <code>configurable</code> leaves the chain's input contract simple (<code>{"question": ...}</code>). Callbacks and tracing tags travel the same way, so in LangSmith every step of a session's run appears under one trace with the session metadata attached.</p></div>
+</section>
+
+<!-- =====================================================================
+     7. MODULE REFERENCE
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">7</span>Module Reference</h1>
+<p>Each module below is documented with its purpose, imports, and a reference card for every function (signature, parameters, return value, behaviour), followed by notes on how it uses LangChain.</p>
+
+<!-- 7.1 utils -->
+<h2>7.1 <code>modules/utils.py</code> — Environment &amp; Embedding Factory</h2>
+<p><b>Purpose.</b> Loads secrets and creates the embedding model. When the module is <i>first imported</i> it resolves <code>&lt;project&gt;/config/.env</code> relative to its own location (so it works from any working directory), loads it with <code>python-dotenv</code>, and prints the path it loaded.</p>
+<table class="kv"><tbody>
+<tr><td>Imports</td><td><code>os</code>, <code>dotenv.<wbr>load_<wbr>dotenv</code>, <span class="b lc">LC</span> <code>langchain_<wbr>openai.<wbr>Open<wbr>AIEmbeddings</code>, <span class="b lc">LC</span> <code>langchain_<wbr>google_<wbr>genai.<wbr>Google<wbr>Generative<wbr>AIEmbeddings</code></td></tr>
+<tr><td>Side effects at import</td><td>Loads <code>.<wbr>env</code> into the process environment; prints <code>Loaded .<wbr>env from: …</code></td></tr>
+<tr><td>Used by</td><td><code>embedder.<wbr>py</code> (and imported, unused, by <code>retriever.<wbr>py</code>)</td></tr>
+</tbody></table>
+<div class="sig"><span class="fn">get_embedding_model</span>(provider: <span class="ty">str</span>) → <span class="ty">Embeddings</span> &nbsp;·&nbsp; line 15</div>
+<div class="sigbody">
+<table><thead><tr><th style="width:22%">provider</th><th style="width:22%">Env var required</th><th>Returns</th></tr></thead><tbody>
+<tr><td><code>"openai"</code></td><td><code>OPENAI_<wbr>API_<wbr>KEY</code></td><td><code>Open<wbr>AIEmbeddings(api_<wbr>key=<wbr>…)</code> — library default model</td></tr>
+<tr><td><code>"gemini"</code> / <code>"google"</code></td><td><code>GOOGLE_<wbr>API_<wbr>KEY</code></td><td><code>Google<wbr>Generative<wbr>AIEmbeddings(model=<wbr>"models/<wbr>gemini-embedding-2", google_<wbr>api_<wbr>key=<wbr>…)</code></td></tr>
+<tr><td>anything else</td><td>—</td><td>raises <code>Value<wbr>Error("Unsupported embedding provider")</code></td></tr>
+</tbody></table>
+<p class="small">The provider name is lower-cased first. A missing key raises <code>ValueError</code> before any network call, so configuration mistakes fail early with a clear message.</p>
+</div>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><p>This is a <b>factory over the <code>Embeddings</code> interface</b>. Callers receive an object with <code>embed_documents</code> / <code>embed_query</code> and do not need to know which vendor is behind it — this is what lets <code>embedder.py</code> handle both providers with the same code.</p></div>
+
+<!-- 7.2 loader -->
+<h2>7.2 <code>modules/loader.py</code> — Document Loading</h2>
+<p><b>Purpose.</b> Converts files and web pages into LangChain <code>Document</code> objects. The project uses small custom loaders built on pypdf, python-docx and BeautifulSoup rather than LangChain's <code>document_loaders</code>, but still outputs the standard <code>Document</code> type so the rest of the pipeline works unchanged.</p>
+<table>
+<thead><tr><th style="width:30%">Function</th><th style="width:22%">Returns</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td><code>text_<wbr>to_<wbr>doc(text, source=<wbr>"inline")</code><br><span class="small">line 10</span></td><td><code>Document</code></td><td>Builds a <span class="b lc">LC</span> <code>Document</code> with <code>metadata=<wbr>{"source": source}</code>. Every loader uses this.</td></tr>
+<tr><td><code>load_<wbr>txt(path)</code><br><span class="small">line 13</span></td><td><code>[Document]</code></td><td>Raises <code>File<wbr>Not<wbr>Found<wbr>Error</code> if missing; reads UTF-8 with <code>errors=<wbr>"ignore"</code> (undecodable bytes are dropped); source = absolute path.</td></tr>
+<tr><td><code>load_<wbr>pdf(path)</code><br><span class="small">line 20</span></td><td><code>[Document] × pages</code></td><td><code>pypdf.<wbr>Pdf<wbr>Reader</code>; <b>one Document per page</b>; empty text for image-only pages; source = <code>"&lt;abs path&gt;: page: N"</code> (1-based).</td></tr>
+<tr><td><code>load_<wbr>docx(path)</code><br><span class="small">line 28</span></td><td><code>[Document]</code></td><td><code>python-docx</code>; keeps non-blank paragraphs joined by <code>\n\n</code> (tables, headers and footers are not extracted).</td></tr>
+<tr><td><code>load_<wbr>url(url)</code><br><span class="small">line 34</span></td><td><code>[Document]</code></td><td><code>requests.<wbr>get</code> (15 s timeout, raises on HTTP errors) → BeautifulSoup; extracts text from <code>p, h1–h3, li</code> elements; source = URL.</td></tr>
+<tr><td><code>load_<wbr>document(path_<wbr>or_<wbr>url)</code><br><span class="small">line 45</span></td><td><code>[Document]</code></td><td><b>Dispatcher.</b> <code>http(s):/<wbr>/</code> → URL; otherwise checks the file exists and routes by extension: <code>.<wbr>txt</code> → txt, <code>.<wbr>pdf</code> → pdf, <code>.<wbr>docx/<wbr>.<wbr>docs/<wbr>.<wbr>doc</code> → docx, anything else → tries plain text, otherwise <code>Value<wbr>Error</code>.</td></tr>
+</tbody></table>
+<div class="call info"><div class="t">ℹ Detail</div><p>The extension list at line 53 contains <code>"md"</code> without a leading dot, so <code>.md</code> files never match that branch. They still load correctly through the plain-text fallback. Legacy binary <code>.doc</code> files are not supported by python-docx and will raise an error.</p></div>
+
+<!-- 7.3 splitter -->
+<h2>7.3 <code>modules/splitter.py</code> — Chunking</h2>
+<div class="sig"><span class="fn">split_documents</span>(docs: <span class="ty">List[Document]</span>, chunk_size: <span class="ty">int</span> = 500, chunk_overlap: <span class="ty">int</span> = 100) → <span class="ty">List[Document]</span> &nbsp;·&nbsp; line 7</div>
+<div class="sigbody">
+<ol>
+<li>Creates a <span class="b lc">LC</span> <code>RecursiveCharacterTextSplitter(chunk_size, chunk_overlap)</code>.</li>
+<li>For each input document, calls <code>splitter.split_text(doc.page_content)</code>.</li>
+<li>For each chunk, copies the parent metadata and adds <code>chunk_index</code> (0-based position within that document).</li>
+<li>Returns a flat list of new <code>Document</code> chunks.</li>
+</ol>
+<table><thead><tr><th>Caller</th><th>chunk_size</th><th>chunk_overlap</th></tr></thead><tbody>
+<tr><td>Function default</td><td>500</td><td>100</td></tr>
+<tr><td>Streamlit app (<code>streamlit_<wbr>app.<wbr>py:121</code>)</td><td>400</td><td>50</td></tr>
+<tr><td>Notebook</td><td>200</td><td>20 / 40</td></tr>
+</tbody></table>
+</div>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><p>Using <code>split_text</code> and rebuilding Documents by hand (instead of <code>split_documents</code>) gives full control over metadata — every chunk carries <code>source</code> + <code>chunk_index</code>, so a retrieved chunk can be traced to an exact position in its source. Note: the class is imported twice (lines 3–4); the second import from the older <code>langchain.text_splitter</code> path overrides the first. Both point to the same class.</p></div>
+
+<!-- 7.4 embedder -->
+<h2>7.4 <code>modules/embedder.py</code> — Vector Store Management</h2>
+<p><b>Purpose.</b> The single entry point for creating, loading, updating and saving the vector index for whichever backend is configured.</p>
+<div class="sig"><span class="fn">build_or_update_vectorstore</span>(docs: <span class="ty">List[Document]</span>, config: <span class="ty">dict</span>, persist_dir: <span class="ty">Optional[str]</span> = None) → <span class="ty">VectorStore</span> &nbsp;·&nbsp; line 23</div>
+<div class="sigbody">
+<table><thead><tr><th style="width:22%">Parameter</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>docs</code></td><td>Chunks to add. Pass <code>[]</code> to only load the existing index (this is what the app does on every rerun).</td></tr>
+<tr><td><code>config</code></td><td>Parsed <code>config.<wbr>json</code>; reads <code>embedding_<wbr>provider</code> and <code>vector_<wbr>store.<wbr>type</code> / <code>vector_<wbr>store.<wbr>cloud.<wbr>*</code>.</td></tr>
+<tr><td><code>persist_<wbr>dir</code></td><td>FAISS folder; default <code>&lt;cwd&gt;/<wbr>vectorstores/&lt;provider&gt;_&lt;type&gt;_<wbr>index</code>.</td></tr>
+</tbody></table>
+<h4>FAISS branch (lines 53–84)</h4>
+<table><thead><tr><th style="width:30%">State</th><th>Action</th></tr></thead><tbody>
+<tr><td><code>index.<wbr>faiss</code> exists</td><td><span class="b lc">LC</span> <code>FAISS.<wbr>load_<wbr>local(.<wbr>.<wbr>.<wbr>, allow_<wbr>dangerous_<wbr>deserialization=<wbr>True)</code>; if <code>docs</code> is non-empty → <code>add_<wbr>documents(docs)</code>.</td></tr>
+<tr><td>No index, <code>docs</code> empty</td><td>Raises <code>Value<wbr>Error("No documents provided and FAISS index not found.<wbr>")</code> — the UI shows this until the first upload.</td></tr>
+<tr><td>No index, <code>docs</code> provided</td><td><span class="b lc">LC</span> <code>FAISS.<wbr>from_<wbr>documents(docs, embedding_<wbr>model)</code>.</td></tr>
+<tr><td>Always</td><td><code>save_<wbr>local(persist_<wbr>dir)</code>, then returns the store.</td></tr>
+</tbody></table>
+<h4>Pinecone branch (lines 89–157)</h4>
+<ol>
+<li>Reads <code>PINECONE_API_KEY</code> (required) and the region from <code>PINECONE_ENV</code>, falling back to <code>vector_store.cloud.environment</code>.</li>
+<li>Index name = <code>&lt;cloud.index_name&gt;-&lt;provider&gt;</code> (e.g. <code>rag-assistant-index-openai</code>), so each embedding provider gets its own index.</li>
+<li><b>Detects the embedding dimension</b> by embedding <code>"Hello world!"</code> (falls back to <code>embed_query</code>).</li>
+<li>If the index does not exist: creates it with <code>metric="cosine"</code> — a <code>PodSpec</code> for <code>*-free</code>/<code>*-starter</code> environments, otherwise <code>ServerlessSpec(cloud="aws", region=env)</code>.</li>
+<li>If it exists: <code>describe_index</code> and <b>checks that the dimension matches</b>; a mismatch raises a descriptive <code>ValueError</code>.</li>
+<li><span class="b lc">LC</span> <code>PineconeVectorStore.from_documents(docs, embedding, index_name, namespace, pinecone_api_key)</code> — connects and upserts.</li>
+</ol>
+</div>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><ul>
+<li><b>Two backends, one return type:</b> both branches return a LangChain <code>VectorStore</code>, so <code>retriever.py</code> calls <code>.as_retriever()</code> the same way for either.</li>
+<li><b>Two SDKs working together:</b> the raw <code>pinecone</code> SDK handles <i>index administration</i> (create/describe), and LangChain's <code>PineconeVectorStore</code> handles the <i>data plane</i> (embed + upsert + query).</li>
+<li><b>Embedding is done inside the store:</b> <code>from_documents</code> / <code>add_documents</code> call <code>embed_documents</code> internally, so the project never handles raw vectors itself.</li>
+</ul></div>
+
+<!-- 7.5 retriever -->
+<h2>7.5 <code>modules/retriever.py</code> — Retrieval Strategy</h2>
+<div class="sig"><span class="fn">get_retriever</span>(vectorstore: <span class="ty">VectorStore</span>, config: <span class="ty">dict</span>) → <span class="ty">BaseRetriever</span> &nbsp;·&nbsp; line 9</div>
+<div class="sigbody">
+<table><thead><tr><th style="width:22%"><code>retriever_type</code></th><th style="width:40%">Construction</th><th>Characteristics</th></tr></thead><tbody>
+<tr><td><code>"base"</code> (default)</td><td><span class="b lc">LC</span> <code>vectorstore.<wbr>as_<wbr>retriever(search_<wbr>kwargs=<wbr>{"k": 3})</code></td><td>Similarity search, top-3 chunks. 1 embedding call per question.</td></tr>
+<tr><td><code>"multiquery"</code></td><td><span class="b lc">LC</span> <code>Multi<wbr>Query<wbr>Retriever.<wbr>from_<wbr>llm(retriever=<wbr>…, llm=<wbr>…)</code>, LLM = <code>Chat<wbr>Open<wbr>AI("gpt-4o-mini", T=<wbr>0)</code> or <code>Chat<wbr>Google<wbr>Generative<wbr>AI("gemini-2.<wbr>5-flash")</code></td><td>The LLM writes alternative phrasings of the question; the union of their results is returned. Better recall, higher latency and cost.</td></tr>
+<tr><td>other</td><td>—</td><td><code>Value<wbr>Error("Unsupported retriever_<wbr>type")</code></td></tr>
+</tbody></table>
+<p class="small">The LLM provider for multi-query follows <code>config["llm_provider"]</code>. The retriever type is read from the <b>top-level</b> key <code>retriever_type</code> (see finding F-03).</p>
+</div>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><p><code>MultiQueryRetriever.from_llm</code> builds an internal <code>prompt | llm | line-parser</code> LCEL chain that produces the alternative questions, runs the base retriever for each, and returns the unique documents. The returned object is a <code>BaseRetriever</code>, so it fits into the RAG chain exactly where the base retriever would.</p></div>
+
+<!-- 7.6 rag_chain -->
+<h2>7.6 <code>modules/rag_chain.py</code> — The Hybrid RAG Chain</h2>
+<div class="sig"><span class="fn">build_rag_chain</span>(retriever: <span class="ty">BaseRetriever</span>, config: <span class="ty">dict</span>) → <span class="ty">Runnable[dict, AIMessage]</span> &nbsp;·&nbsp; line 14</div>
+<div class="sigbody">
+<table><thead><tr><th style="width:24%">Config key</th><th style="width:22%">Default</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>llm_<wbr>provider</code></td><td><code>"openai"</code></td><td>Chooses <code>Chat<wbr>Open<wbr>AI</code> or <code>Chat<wbr>Google<wbr>Generative<wbr>AI</code>; any other value → <code>Value<wbr>Error</code>.</td></tr>
+<tr><td><code>llm_<wbr>temperature</code></td><td><code>0.<wbr>3</code></td><td>Sampling temperature for the answer model.</td></tr>
+<tr><td><code>openai_<wbr>model</code></td><td><code>"gpt-4o-mini"</code></td><td>OpenAI chat model name.</td></tr>
+<tr><td><code>gemini_<wbr>model</code></td><td><code>"gemini-2.<wbr>5-flash"</code></td><td>Gemini chat model name.</td></tr>
+</tbody></table>
+<h4>Internal elements</h4>
+<table><thead><tr><th style="width:24%">Element</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>system_<wbr>prompt</code></td><td>Role instructions telling the model it has (1) a conversation summary and (2) the most recent turns, and should use both.</td></tr>
+<tr><td><code>prompt</code></td><td><span class="b lc">LC</span> <code>Chat<wbr>Prompt<wbr>Template</code> with sections: System Prompt · Conversation Summary Memory · Recent Chat History · Retrieved Context · User Question, followed by guidance to rely on memory for meta-questions (“summarise our chat”) and on context + memory otherwise.</td></tr>
+<tr><td><code>combine_<wbr>docs(docs)</code></td><td>Accepts a list (or a dict with <code>context</code>); returns the chunk texts joined by blank lines, or <i>“No relevant context found.”</i> when nothing was retrieved — so the model is told explicitly when there is no context.</td></tr>
+<tr><td><code>rag_<wbr>chain</code></td><td><code>Runnable<wbr>Parallel(5 branches) | prompt | llm</code> — see section 6.3.</td></tr>
+</tbody></table>
+</div>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action — the centre of the project</div><p>This module is where LCEL is used most. A single declarative expression combines <b>retrieval</b> (<code>retriever</code> Runnable), <b>memory</b> (config-aware <code>RunnableLambda</code>s), <b>prompting</b> (<code>ChatPromptTemplate</code>) and <b>generation</b> (<code>BaseChatModel</code>). The result supports <code>invoke</code>/<code>batch</code>/<code>stream</code> and the async versions, and it is traced in LangSmith with no extra code.</p></div>
+
+<!-- 7.7 memory -->
+<h2>7.7 <code>modules/memory.py</code> — Hybrid Session Memory</h2>
+<p><b>Purpose.</b> Gives each chat session its own memory, made of three per-session stores:</p>
+<table>
+<thead><tr><th style="width:28%">Module-level store</th><th style="width:30%">Value type</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>SESSION_<wbr>MESSAGE_<wbr>HISTORY</code></td><td><span class="b lc">LC</span> <code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code></td><td>Complete list of messages for the session.</td></tr>
+<tr><td><code>SESSION_<wbr>SUMMARY_<wbr>MEMORY</code></td><td><span class="b lc">LC</span> <code>Conversation<wbr>Summary<wbr>Memory</code></td><td>LLM-maintained running summary (gpt-4o-mini, T=0), sharing the message history above.</td></tr>
+<tr><td><code>SESSION_<wbr>RECENT_<wbr>MEMORY</code></td><td><code>list[{"user",<wbr>"ai"}]</code></td><td>Rolling window of the last <i>n</i> (default 2) Q&amp;A pairs.</td></tr>
+</tbody></table>
+<table>
+<thead><tr><th style="width:36%">Function</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td><code>get_<wbr>session_<wbr>message_<wbr>history(session_<wbr>id)</code> <span class="small">l.21</span></td><td>Creates the session's <code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code> on first use, then returns it.</td></tr>
+<tr><td><code>get_<wbr>session_<wbr>summary_<wbr>memory(session_<wbr>id)</code> <span class="small">l.27</span></td><td>Creates the session's <code>Conversation<wbr>Summary<wbr>Memory(llm=<wbr>Chat<wbr>Open<wbr>AI("gpt-4o-mini",<wbr>0), chat_<wbr>memory=<wbr>history, return_<wbr>messages=<wbr>True)</code> on first use, then returns it.</td></tr>
+<tr><td><code>get_<wbr>recent_<wbr>memory(session_<wbr>id, n=<wbr>2)</code> <span class="small">l.38</span></td><td>Returns the last <i>n</i> stored turns (or fewer).</td></tr>
+<tr><td><code>update_<wbr>recent_<wbr>memory(session_<wbr>id, user, ai, n=<wbr>2)</code> <span class="small">l.44</span></td><td>Appends <code>{"user",<wbr>"ai"}</code> and trims the list to the last <i>n</i> entries.</td></tr>
+<tr><td><code>get_<wbr>recent_<wbr>memory_<wbr>formatted(session_<wbr>id, n=<wbr>2)</code> <span class="small">l.52</span></td><td>Formats the window as <code>User: …\n<wbr>Assistant: …</code> blocks, or <i>“No recent chat history available.”</i></td></tr>
+<tr><td><code>add_<wbr>memory_<wbr>to_<wbr>chain(rag_<wbr>chain, session_<wbr>id, enabled=<wbr>True, recent_<wbr>n=<wbr>2)</code> <span class="small">l.64</span></td><td>If <code>enabled</code> is false, returns the chain unchanged (stateless). Otherwise wraps it — see below.</td></tr>
+<tr><td><code>get_<wbr>memory_<wbr>summary(session_<wbr>id)</code> <span class="small">l.106</span></td><td>Returns the current summary text (read by the <code>memory_<wbr>summary</code> branch).</td></tr>
+<tr><td><code>get_<wbr>recent_<wbr>context(session_<wbr>id, n=<wbr>2)</code> <span class="small">l.111</span></td><td>Returns the formatted recent window (read by the <code>recent_<wbr>memory</code> branch).</td></tr>
+</tbody></table>
+<h4>How <code>add_memory_to_chain</code> wraps the chain</h4>
+<pre><span class="k">def</span> <span class="f">chain_with_summary</span>(input_data, config=<span class="k">None</span>):
+    response  = rag_chain.<span class="f">invoke</span>(input_data, config=config)      <span class="c"># 1. run RAG</span>
+    summary_memory.<span class="f">save_context</span>({<span class="s">"input"</span>: q}, {<span class="s">"output"</span>: a})     <span class="c"># 2. update summary (LLM call)</span>
+    <span class="f">update_recent_memory</span>(session_id, q, a, n=recent_n)           <span class="c"># 3. update rolling window</span>
+    new_summary = summary_memory.<span class="f">predict_new_summary</span>(msgs, old) <span class="c"># 4. re-summarise (2nd LLM call)</span>
+    summary_memory._buffer = new_summary                          <span class="c">#    see finding F-05</span>
+    <span class="k">return</span> response
+
+<span class="k">return</span> <span class="lc">RunnableWithMessageHistory</span>(
+    <span class="lc">RunnableLambda</span>(chain_with_summary),
+    get_session_history=<span class="k">lambda</span> _: get_session_message_history(session_id),
+    input_messages_key=<span class="s">"question"</span>, history_messages_key=<span class="s">"history"</span>, output_messages_key=<span class="k">None</span>)</pre>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><ul>
+<li><b><code>RunnableWithMessageHistory</code></b> takes the human message from the <code>question</code> key, adds stored history under <code>history</code>, and records the returned <code>AIMessage</code> (with <code>output_messages_key=None</code> the whole output is treated as the message).</li>
+<li><b><code>ConversationSummaryMemory</code></b> is a classic (pre-LCEL) memory class used here only as a <i>summary engine</i>: its <code>save_context</code> and <code>predict_new_summary</code> run an internal summarisation prompt through the LLM.</li>
+<li><b>Hybrid design:</b> the summary provides long-range, compressed context; the rolling window keeps the exact wording of the latest turns — both are placed in the prompt on every call.</li>
+</ul></div>
+
+<!-- 7.8 streamlit -->
+<h2>7.8 <code>app/streamlit_app.py</code> — UI &amp; Orchestration</h2>
+<table>
+<thead><tr><th style="width:22%">Section</th><th style="width:12%">Lines</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Path bootstrap</td><td>5–7</td><td>Adds the project root to <code>sys.<wbr>path</code> so <code>modules.<wbr>*</code> imports work when Streamlit is started from any folder.</td></tr>
+<tr><td>Config load</td><td>21–23</td><td>Reads <code>config/<wbr>config.<wbr>json</code> into the global <code>CONFIG</code>.</td></tr>
+<tr><td>Session model</td><td>27–57</td><td><code>st.<wbr>session_<wbr>state.<wbr>chat_<wbr>sessions: {uuid: {name, llm_<wbr>provider, memory_<wbr>enabled, chat_<wbr>history}}</code> and <code>active_<wbr>session</code>. One session is created automatically; <b>➕ New Chat</b> adds more.</td></tr>
+<tr><td>Session selector</td><td>61–79</td><td>A selectbox of session names maps back to the session UUID.</td></tr>
+<tr><td>Per-session settings</td><td>85–97</td><td>LLM provider (<code>openai</code>/<code>gemini</code>) and memory toggle, with widget keys unique to each session.</td></tr>
+<tr><td>Uploader &amp; ingestion</td><td>102–124</td><td>Saves the file, then <code>load_<wbr>document → split_<wbr>documents(400, 50) → build_<wbr>or_<wbr>update_<wbr>vectorstore</code>.</td></tr>
+<tr><td>Backend build</td><td>129–144</td><td><code>build_<wbr>or_<wbr>update_<wbr>vectorstore([], CONFIG)</code> → <code>get_<wbr>retriever</code> → sets <code>CONFIG["llm_<wbr>provider"]</code> from the session → <code>build_<wbr>rag_<wbr>chain</code> → <code>add_<wbr>memory_<wbr>to_<wbr>chain</code>. Errors are shown with <code>st.<wbr>error</code> and execution stops (<code>st.<wbr>stop()</code>).</td></tr>
+<tr><td>Chat loop</td><td>150–182</td><td>Shows earlier messages; for new input, invokes the chain with <code>configurable.<wbr>session_<wbr>id</code>, renders <code>response.<wbr>content</code>, and catches exceptions so they are shown in the chat.</td></tr>
+</tbody></table>
+<div class="call lc"><div class="t">🦜🔗 LangChain in action</div><p>The UI never works with LangChain objects directly beyond a single <code>.invoke()</code> call. The Streamlit session UUID becomes LangChain's <code>configurable.session_id</code>, which connects UI sessions to LangChain memory.</p></div>
+
+<!-- 7.9 template -->
+<h2>7.9 <code>template.py</code> — Project Scaffolding</h2>
+<div class="sig"><span class="fn">create_project_structure</span>() → <span class="ty">None</span></div>
+<div class="sigbody"><p>Uses a <code>dict[folder → items]</code> structure to create the folders (<code>config, data, vectorstores, modules, app, notebooks</code>), sub-folders (entries ending in <code>/</code>) and empty files (<code>pathlib.Path.touch</code>). The <code>""</code> key stands for root-level files. Safe to run again: <code>exist_ok=True</code>, and <code>touch</code> does not truncate existing files.</p></div>
+
+<!-- 7.10 notebook -->
+<h2>7.10 <code>notebooks/RAG_Debugging_Notebook.ipynb</code> — Test Harness</h2>
+<table>
+<thead><tr><th style="width:9%">Cell</th><th style="width:26%">Stage tested</th><th>What it verifies</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>Setup</td><td>Adds the parent folder to <code>sys.<wbr>path</code>; imports loader and splitter; suppresses warnings.</td></tr>
+<tr><td>1</td><td>Loader</td><td>Loads <code>sample_<wbr>text.<wbr>txt</code> (creates a placeholder if missing); prints document count and a preview.</td></tr>
+<tr><td>2</td><td>Splitter</td><td>Splits with 200 / 20; prints chunk count, first chunk and its metadata.</td></tr>
+<tr><td>3–4</td><td>Embeddings</td><td>(Commented out) smoke test of <code>get_<wbr>embedding_<wbr>model</code> for both providers.</td></tr>
+<tr><td>5–6</td><td>Vector store</td><td>Loads config, splits with 200 / 40, builds the FAISS index → creates <code>notebooks/<wbr>vectorstores/<wbr>openai_<wbr>faiss_<wbr>index/</code>.</td></tr>
+<tr><td>7</td><td>Similarity search</td><td><code>vectorstore.<wbr>similarity_<wbr>search("Explain scikit-learn in short?", k=<wbr>2)</code>.</td></tr>
+<tr><td>8</td><td>Retriever</td><td><code>get_<wbr>retriever(.<wbr>.<wbr>.<wbr>).<wbr>invoke(query)</code> — exercises the Runnable retriever interface.</td></tr>
+<tr><td>9</td><td>Chain + memory</td><td>Two-turn conversation for session <code>test_<wbr>user_<wbr>001</code>; the second question (“summarise our conversation in 3 bullet points”) tests that memory works.</td></tr>
+</tbody></table>
+</section>
+
+<!-- =====================================================================
+     8. CONFIGURATION
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">8</span>Configuration Reference</h1>
+<h2>8.1 <code>config/config.json</code></h2>
+<table>
+<thead><tr><th style="width:28%">Key</th><th style="width:16%">Value</th><th style="width:22%">Read by</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><code>llm_<wbr>provider</code></td><td><code>"openai"</code></td><td>rag_chain, retriever</td><td><span class="b ok">Active</span> Overridden at runtime by each session's sidebar choice.</td></tr>
+<tr><td><code>embedding_<wbr>provider</code></td><td><code>"openai"</code></td><td>embedder → utils</td><td><span class="b ok">Active</span> <code>openai</code> | <code>gemini</code>. Changing it creates a separate index (the provider is part of the path/name).</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>type</code></td><td><code>"faiss"</code></td><td>embedder</td><td><span class="b ok">Active</span> <code>faiss</code> | <code>pinecone</code>.</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>local.<wbr>faiss_<wbr>path</code></td><td><code>"vectorstores/<wbr>faiss_<wbr>index"</code></td><td>—</td><td><span class="b dead">Unused</span> Path is derived from the cwd instead.</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>cloud.<wbr>index_<wbr>name</code></td><td><code>"rag-assistant-index"</code></td><td>embedder</td><td><span class="b ok">Active</span> <code>-&lt;provider&gt;</code> is appended.</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>cloud.<wbr>namespace</code></td><td><code>"default"</code></td><td>embedder</td><td><span class="b ok">Active</span> Pinecone namespace.</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>cloud.<wbr>environment</code></td><td><code>"gcp-starter"</code></td><td>embedder</td><td><span class="b warn">Fallback</span> Used only when <code>PINECONE_<wbr>ENV</code> is not set; <code>*-starter</code> selects <code>Pod<wbr>Spec</code>.</td></tr>
+<tr><td><code>vector_<wbr>store.<wbr>cloud.<wbr>provider</code> / <code>dimension</code></td><td><code>"faiss"</code> / <code>1536</code></td><td>—</td><td><span class="b dead">Unused</span> Dimension is detected at runtime.</td></tr>
+<tr><td><code>retriever.<wbr>type</code> / <code>top_<wbr>k</code></td><td><code>"base"</code> / <code>3</code></td><td>—</td><td><span class="b dead">Unused</span> Code reads top-level <code>retriever_<wbr>type</code>; k is hard-coded to 3.</td></tr>
+<tr><td><code>prompt.<wbr>system_<wbr>prompt</code> / <code>temperature</code> / <code>max_<wbr>tokens</code></td><td>…</td><td>—</td><td><span class="b dead">Unused</span> Prompt is hard-coded; temperature read from <code>llm_<wbr>temperature</code>.</td></tr>
+<tr><td><code>memory.<wbr>enabled_<wbr>default</code> / <code>max_<wbr>memory_<wbr>window</code></td><td><code>true</code> / <code>5</code></td><td>—</td><td><span class="b dead">Unused</span> UI defaults to on; window is <code>recent_<wbr>n=<wbr>2</code>.</td></tr>
+<tr><td><code>chunking.<wbr>chunk_<wbr>size</code> / <code>chunk_<wbr>overlap</code></td><td><code>500</code> / <code>100</code></td><td>—</td><td><span class="b dead">Unused</span> App passes 400 / 50.</td></tr>
+<tr><td><i>(absent)</i> <code>llm_<wbr>temperature</code>, <code>openai_<wbr>model</code>, <code>gemini_<wbr>model</code>, <code>retriever_<wbr>type</code></td><td>—</td><td>rag_chain, retriever</td><td><span class="b info">Optional</span> Can be added at top level to override the code defaults.</td></tr>
+</tbody></table>
+
+<h2>8.2 Environment Variables (<code>config/.env</code>)</h2>
+<table>
+<thead><tr><th style="width:24%">Variable</th><th style="width:22%">Required when</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>OPENAI_<wbr>API_<wbr>KEY</code></td><td>Always (in practice)</td><td>OpenAI embeddings/chat. <b>Also required for summary memory even when Gemini is selected</b>, because <code>memory.<wbr>py</code> always uses <code>Chat<wbr>Open<wbr>AI</code>.</td></tr>
+<tr><td><code>GOOGLE_<wbr>API_<wbr>KEY</code></td><td>Gemini selected</td><td>Gemini chat and/or embeddings.</td></tr>
+<tr><td><code>PINECONE_<wbr>API_<wbr>KEY</code></td><td><code>vector_<wbr>store.<wbr>type = pinecone</code></td><td>Pinecone authentication.</td></tr>
+<tr><td><code>PINECONE_<wbr>ENV</code></td><td>Optional</td><td>Region (e.g. <code>us-east-1</code>); takes precedence over <code>config.<wbr>json</code>.</td></tr>
+<tr><td><code>LANGCHAIN_<wbr>TRACING_<wbr>V2</code>, <code>LANGCHAIN_<wbr>API_<wbr>KEY</code>, <code>LANGCHAIN_<wbr>PROJECT</code></td><td>Optional</td><td>Turns on LangSmith tracing of every chain run (the <code>langsmith</code> package is already installed).</td></tr>
+</tbody></table>
+</section>
+
+<!-- =====================================================================
+     9. INSTALL & RUN
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">9</span>Installation &amp; Operation</h1>
+<h2>9.1 Prerequisites</h2>
+<table class="kv"><tbody>
+<tr><td>Python</td><td>3.10 – 3.12 (developed on 3.12)</td></tr>
+<tr><td>Accounts / keys</td><td>OpenAI API key (required); Google AI Studio key (for Gemini); Pinecone key (for cloud store)</td></tr>
+<tr><td>OS</td><td>Windows, macOS or Linux</td></tr>
+</tbody></table>
+
+<h2>9.2 Setup</h2>
+<pre><span class="c"># 1. Create and activate a virtual environment</span>
+python -m venv .venv
+.venv\Scripts\activate            <span class="c"># Windows   (macOS/Linux: source .venv/bin/activate)</span>
+
+<span class="c"># 2. Install dependencies</span>
+pip install -r requirements.txt
+
+<span class="c"># 3. Configure secrets — copy the template into config/.env and fill in keys</span>
+copy env-sample.txt config\.env   <span class="c"># Windows   (macOS/Linux: cp env-sample.txt config/.env)</span></pre>
+
+<h2>9.3 Running</h2>
+<pre><span class="c"># From the project root (important: FAISS index path is relative to the working directory)</span>
+streamlit run app/streamlit_app.py</pre>
+<ol>
+<li>On first launch no index exists, so the page shows <i>“No documents provided and FAISS index not found.”</i> — upload a document in the sidebar to create it.</li>
+<li>Ask questions in the chat box. Use <b>➕ New Chat</b> for separate conversations, and the sidebar to switch LLM provider or turn memory on/off for each chat.</li>
+<li>For step-by-step debugging, open <code>notebooks/RAG_Debugging_Notebook.ipynb</code> and run the cells in order.</li>
+</ol>
+
+<h2>9.4 Switching Providers</h2>
+<table class="teal" style="break-inside:avoid">
+<thead><tr><th style="width:30%">Goal</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Answer with Gemini</td><td>Sidebar → <i>LLM Provider</i> → <code>gemini</code> (per session, no restart).</td></tr>
+<tr><td>Embed with Gemini</td><td><code>"embedding_<wbr>provider": "gemini"</code> → re-upload documents (a new index is created).</td></tr>
+<tr><td>Use Pinecone</td><td><code>"vector_<wbr>store": {"type": "pinecone", …}</code> + <code>PINECONE_<wbr>API_<wbr>KEY</code> (+ <code>PINECONE_<wbr>ENV</code>).</td></tr>
+<tr><td>Multi-query retrieval</td><td>Add top-level <code>"retriever_<wbr>type": "multiquery"</code>.</td></tr>
+<tr><td>Change model / temperature</td><td>Add top-level <code>"openai_<wbr>model"</code>, <code>"gemini_<wbr>model"</code>, <code>"llm_<wbr>temperature"</code>.</td></tr>
+</tbody></table>
+</section>
+
+<!-- =====================================================================
+     10. ENGINEERING REVIEW
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">10</span>Engineering Review</h1>
+<p>A code review carried out while preparing this document found the following issues. They are listed to help with future work; none of them stops the main flow (upload → ask → answer) from working.</p>
+<h2>10.1 Findings Register</h2>
+<table>
+<thead><tr><th style="width:6%">ID</th><th style="width:9%">Severity</th><th style="width:19%">Location</th><th>Finding</th><th style="width:27%">Recommendation</th></tr></thead>
+<tbody>
+<tr><td>F-01</td><td><span class="b hi">High</span></td><td><code>streamlit_<wbr>app.<wbr>py:111</code></td><td>Streamlit reruns the script on every interaction and the uploader keeps its file, so the <code>if uploaded_<wbr>file:</code> block runs again on every chat message. The same document is re-embedded and <b>added to FAISS again each time</b> (duplicate chunks, extra embedding cost).</td><td>Record processed file names/hashes in <code>st.<wbr>session_<wbr>state</code> and skip files already ingested.</td></tr>
+<tr><td>F-02</td><td><span class="b hi">High</span></td><td><code>memory.<wbr>py:30</code></td><td>Summary memory always uses <code>Chat<wbr>Open<wbr>AI</code>, so Gemini-only setups fail without an OpenAI key, and summarisation calls go to OpenAI even in Gemini sessions.</td><td>Pass the session's chat model into <code>get_<wbr>session_<wbr>summary_<wbr>memory</code>.</td></tr>
+<tr><td>F-03</td><td><span class="b med">Medium</span></td><td><code>retriever.<wbr>py:11</code></td><td>Reads <code>config["retriever_<wbr>type"]</code>, but <code>config.<wbr>json</code> defines <code>retriever.<wbr>type</code> / <code>top_<wbr>k</code>, which are therefore ignored.</td><td>Read <code>config["retriever"]["type"]</code> and <code>top_<wbr>k</code>.</td></tr>
+<tr><td>F-04</td><td><span class="b med">Medium</span></td><td><code>retriever.<wbr>py:28</code></td><td>Typo <code>search_<wbr>kwards</code> → the multi-query base retriever ignores k=3 and falls back to the library default (k=4).</td><td>Change it to <code>search_<wbr>kwargs</code>.</td></tr>
+<tr><td>F-05</td><td><span class="b med">Medium</span></td><td><code>memory.<wbr>py:84-87</code></td><td><code>save_<wbr>context</code> already updates the summary. The second <code>predict_<wbr>new_<wbr>summary</code> call is an extra LLM call, and its result is stored in <code>_<wbr>buffer</code>, a field the class never reads (the real field is <code>buffer</code>), so it is thrown away.</td><td>Remove lines 84–87, or assign to <code>summary_<wbr>memory.<wbr>buffer</code> and drop the <code>save_<wbr>context</code> summary.</td></tr>
+<tr><td>F-06</td><td><span class="b med">Medium</span></td><td><code>memory.<wbr>py:78 / :96</code></td><td><code>save_<wbr>context</code> and <code>Runnable<wbr>With<wbr>Message<wbr>History</code> both write to the same <code>In<wbr>Memory<wbr>Chat<wbr>Message<wbr>History</code>, so each turn is stored twice.</td><td>Give the summary memory its own history object, or let only one component write.</td></tr>
+<tr><td>F-07</td><td><span class="b med">Medium</span></td><td><code>embedder.<wbr>py:55</code></td><td>The FAISS path depends on the current working directory. The notebook and the app therefore use different indexes (<code>notebooks/<wbr>vectorstores</code> vs <code>.<wbr>/<wbr>vectorstores</code>), and <code>vector_<wbr>store.<wbr>local.<wbr>faiss_<wbr>path</code> is ignored.</td><td>Resolve the path from the project root and use <code>faiss_<wbr>path</code> from config.</td></tr>
+<tr><td>F-08</td><td><span class="b med">Medium</span></td><td><code>streamlit_<wbr>app.<wbr>py:129-144</code></td><td>The vector store, retriever and chain are rebuilt (and FAISS is saved to disk) on every rerun.</td><td>Cache them with <code>@st.<wbr>cache_<wbr>resource</code>, keyed on provider/config.</td></tr>
+<tr><td>F-09</td><td><span class="b lo">Low</span></td><td><code>config.<wbr>json</code></td><td>The <code>prompt</code>, <code>memory</code>, <code>chunking</code> and <code>retriever</code> sections are not read; values are hard-coded instead.</td><td>Read these sections in the code so <code>config.<wbr>json</code> is the single source of truth.</td></tr>
+<tr><td>F-10</td><td><span class="b lo">Low</span></td><td><code>loader.<wbr>py:53</code></td><td><code>"md"</code> is missing its leading dot; <code>.<wbr>doc</code>/<code>.<wbr>docs</code> cannot be read by python-docx.</td><td>Use <code>".<wbr>md"</code>; remove <code>.<wbr>doc</code>/<code>.<wbr>docs</code> from the list.</td></tr>
+<tr><td>F-11</td><td><span class="b lo">Low</span></td><td>retriever, splitter, embedder</td><td>Unused imports (<code>LLMChain</code>, <code>Prompt<wbr>Template</code>, <code>get_<wbr>embedding_<wbr>model</code>, <code>Chroma</code>) and a duplicate splitter import.</td><td>Remove them.</td></tr>
+<tr><td>F-12</td><td><span class="b lo">Low</span></td><td>memory, rag_chain, retriever</td><td>Old import paths (<code>langchain.<wbr>schema.<wbr>runnable</code>, <code>langchain.<wbr>prompts</code>); <code>Conversation<wbr>Summary<wbr>Memory</code> is deprecated in LangChain 0.3.</td><td>Import from <code>langchain_<wbr>core.<wbr>*</code>; build the summary step as a small LCEL chain.</td></tr>
+<tr><td>F-13</td><td><span class="b lo">Low</span></td><td><code>streamlit_<wbr>app.<wbr>py:108</code></td><td>The <code>os.<wbr>path.<wbr>join(.<wbr>.<wbr>.<wbr>)</code> result is never used.</td><td>Delete the line.</td></tr>
+<tr><td>F-14</td><td><span class="b lo">Low</span></td><td><code>gradio_<wbr>app.<wbr>py</code>, <code>run_<wbr>app.<wbr>bat</code></td><td>Empty placeholders.</td><td>Implement them or remove them from the repository.</td></tr>
+</tbody></table>
+
+<h2>10.2 Recommended Roadmap</h2>
+<div class="grid3">
+<div class="card"><h4>Phase 1 · Correctness</h4><ul><li>Fix F-01 (re-ingestion)</li><li>Fix F-03/F-04 (retriever config)</li><li>Fix F-05/F-06 (memory)</li><li>Use the session's LLM for summaries (F-02)</li></ul></div>
+<div class="card lc"><h4>Phase 2 · LangChain modernisation</h4><ul><li>Move imports to <code>langchain_core</code></li><li>Replace <code>ConversationSummaryMemory</code> with an LCEL summariser</li><li>Show answers token by token with <code>chain.stream()</code> + <code>st.write_stream</code></li><li>Return source citations from chunk metadata</li></ul></div>
+<div class="card navy"><h4>Phase 3 · Production</h4><ul><li>Cache resources (F-08)</li><li>Persistent chat history (Redis / SQL)</li><li>Turn on LangSmith tracing and evaluation</li><li>Gradio UI + launcher script</li></ul></div>
+</div>
+</section>
+
+<!-- =====================================================================
+     11. GLOSSARY
+====================================================================== -->
+<section class="chapter">
+<h1><span class="num">11</span>Glossary</h1>
+<table class="kv">
+<tbody>
+<tr><td>RAG</td><td>Retrieval-Augmented Generation — retrieving relevant passages from your own data and adding them to the LLM prompt so the answer is based on that data.</td></tr>
+<tr><td>LangChain</td><td>Open-source framework that provides standard interfaces and integrations for building LLM applications.</td></tr>
+<tr><td>LCEL</td><td>LangChain Expression Language — the <code>|</code>-based way of combining Runnables into chains that support invoke/batch/stream and async.</td></tr>
+<tr><td>Runnable</td><td>LangChain's base interface for any step in a chain (prompts, models, retrievers, lambdas, parallel maps).</td></tr>
+<tr><td>Document</td><td>LangChain's text container: <code>page_<wbr>content</code> + <code>metadata</code>.</td></tr>
+<tr><td>Chunk</td><td>A piece of a document produced by a text splitter; the unit that is embedded and retrieved.</td></tr>
+<tr><td>Embedding</td><td>A list of numbers (vector) that represents the meaning of a text; similar texts produce nearby vectors.</td></tr>
+<tr><td>Vector store</td><td>A database that stores embeddings and finds the nearest ones to a query vector (FAISS, Pinecone).</td></tr>
+<tr><td>Retriever</td><td>A Runnable that maps a query string to a list of relevant Documents.</td></tr>
+<tr><td>Multi-Query Retrieval</td><td>Using an LLM to rewrite a question in several ways, then merging the results of each search to improve recall.</td></tr>
+<tr><td>Summary memory</td><td>An LLM-maintained short summary of a conversation, used to keep long-range context.</td></tr>
+<tr><td>Rolling window memory</td><td>The last <i>n</i> turns kept word for word, used for short-term context.</td></tr>
+<tr><td>RunnableConfig / configurable</td><td>Runtime settings passed alongside a chain's input (e.g. <code>session_<wbr>id</code>, callbacks, tags) and passed down to every nested step.</td></tr>
+<tr><td>Namespace (Pinecone)</td><td>A logical partition inside a Pinecone index, used to separate data sets.</td></tr>
+<tr><td>LangSmith</td><td>LangChain's tracing and evaluation platform for inspecting chain runs.</td></tr>
+</tbody></table>
+
+<div style="margin-top:12mm;padding:5mm 6mm;border-radius:8px;background:linear-gradient(120deg,#0B2545,#13315C 60%,#0F6B63);color:#fff;break-inside:avoid">
+<div style="font-size:12pt;font-weight:700">Capstone RAG Chatbot — Technical Documentation</div>
+<div style="font-size:9pt;color:#C9D8EC;margin-top:1mm">Revision 1.0 · October 2026 · Prepared for the IIT Patna Module 5 Capstone. Generated from the source code at the time of writing; line references apply to that version.</div>
+</div>
+</section>
+
+</div>
+</body>
+</html>

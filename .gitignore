@@ -1,0 +1,22 @@
+# Secrets — never commit API keys
+.env
+config/.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated vector indexes (rebuilt from documents at runtime)
+vectorstores/
+notebooks/vectorstores/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
